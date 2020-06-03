@@ -1,0 +1,1 @@
+/usr/bin/c++   -std=c++11 -DNOMINMAX=1 -DPLATFORM_LINUX=1   CMakeFiles/PathTracer.dir/src/Main.cpp.o  -o PathTracer src/libCore.a external/glfw/src/libglfw3.a external/glad/libglad.a external/imgui/libimgui.a external/imguizmo/libimguizmo.a -lpthread /usr/lib/x86_64-linux-gnu/librt.so -lm -ldl 

@@ -1,0 +1,82 @@
+Renderer
+{
+	resolution 1280 720
+	maxDepth 2
+	numTilesX 5
+	numTilesY 5
+}
+
+Camera
+{
+	position -0.2 -0.5 5.5
+	lookAt 0.25 -0.3 0
+	fov 60
+	aperture 0.002
+	focaldist 4.8
+}
+
+material white_helmet
+{
+	color 1.0 1.0 1.0
+	metallic 0.001
+	roughness 0.001
+}
+
+material white_box
+{
+	color 1.0 1.0 1.0
+	roughness 1.0
+}
+
+material black_visor
+{
+	color 0.0 0.0 0.0
+	metallic 1.0
+	roughness 0.001
+}
+
+
+mesh
+{
+	file stormtrooper/box.obj
+	material white_box
+}
+
+mesh
+{
+	file stormtrooper/frame.obj
+	material black_visor
+}
+
+mesh
+{
+	file stormtrooper/helmets.obj
+	material white_helmet
+}
+
+light
+{
+	position 1.225934 2.998622 4.573376
+	v1 -1.978162 2.998622 -0.324129
+	v2 1.777686 2.998622 4.212403
+	emission 20 20 20
+	type Quad
+}
+
+light
+{
+	position -2.298571 2.998622 -0.813879
+	v1 -4.950915 2.998622 -6.072357
+	v2 -1.746819 2.998622 -1.174852
+	emission 20 20 20
+	type Quad
+}
+
+light
+{
+	position -5.823077 2.998622 -6.201134
+	v1 -8.475420 2.998622 -11.459612
+	v2 -5.271325 2.998622 -6.562108
+	emission 20 20 20
+	type Quad
+}

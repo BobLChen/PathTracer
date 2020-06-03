@@ -1,0 +1,38 @@
+Renderer
+{
+	resolution 1280 720
+	maxDepth 2
+	numTilesX 5
+	numTilesY 5
+	#envMap HDR/san_giuseppe_bridge_blurred.hdr
+}
+
+Camera
+{
+	position 36 15 32
+	lookAt -1.5 5.8 -2.1
+	fov 50
+}
+
+material white
+{
+	color 1.0 1.0 1.0
+	metallic 0.1
+	roughness 0.01
+	#materialType 1.0
+	#ior 1.4
+}
+
+mesh
+{
+	file dragon/dragon.obj
+	material white
+}
+
+light
+{
+	type Sphere
+	position -12 69 69
+	radius 25.0
+	emission 25 25 25
+}

@@ -1,0 +1,61 @@
+Renderer
+{
+	resolution 1280 720
+	maxDepth 3
+	numTilesX 5
+	numTilesY 5
+}
+
+Camera
+{
+	position -0.3 0.5 1.6
+	lookAt -0.1 1.0 -1
+	aperture 0.0002
+	focaldist 2.57
+	fov 50
+}
+
+material orange
+{
+	color 0.8 0.289 0.006
+	roughness 0.2
+}
+
+mesh
+{
+	file panther/panther.obj
+	material orange
+}
+
+mesh
+{
+	file panther/background.obj
+	material orange
+}
+
+light
+{
+	type Quad
+	position -3.104297 0.428073 -1.188536
+	v2 -3.104297 3.108073 -1.188536
+	v1 -1.446963 0.428073 -3.294632
+	emission 3 3 3
+}
+
+light
+{
+	type Quad
+	position -0.618198 2.776746 -1.119280
+	v2 0.521802 2.776746 -1.119280
+	v1 -0.618198 2.776746 -2.239280
+	emission 20 20 20
+}
+
+light
+{
+	type Quad
+	position -0.428198 4.113605 -1.421092
+	v2 0.331802 4.113605 -1.421092
+	v1 -0.428198 4.671239 -1.937468
+	emission 30 30 30
+}

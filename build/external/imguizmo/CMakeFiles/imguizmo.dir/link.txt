@@ -1,0 +1,2 @@
+/usr/bin/ar qc libimguizmo.a  CMakeFiles/imguizmo.dir/ImGuizmo.cpp.o
+/usr/bin/ranlib libimguizmo.a
