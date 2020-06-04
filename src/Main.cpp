@@ -397,6 +397,7 @@ std::string GetSceneFile(int argc, char** argv)
 		if (!strcmp("-h", argv[i]) || !strcmp("-?", argv[i])) 
 		{
 			Usage();
+			exit(0);
 			return filename;
 		}
 		else if (!strcmp("-i", argv[i]) && i < argc_check) 

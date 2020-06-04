@@ -24,12 +24,14 @@ namespace GLSLPT
 			}
 		}
 		
+	public:
+
 		// Mesh Data
 		std::vector<glm::vec4> verticesUVX;
 		std::vector<glm::vec4> normalsUVY;
 
 		RadeonRays::Bvh *bvh;
-		std::string meshName;
+		std::string name;
 
 		void BuildBVH();
 		bool LoadFromFile(const std::string& filename);

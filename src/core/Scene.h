@@ -14,10 +14,10 @@
 
 #include "bvh/Bvh.h"
 #include "bvh/BvhTranslator.h"
-
 #include "parser/HDRLoader.h"
-
 #include "math/Math.h"
+#include "job/TaskThreadPool.h"
+#include "job/ThreadTask.h"
 
 namespace GLSLPT
 {
@@ -31,33 +31,9 @@ namespace GLSLPT
 	class Scene
 	{
 	public:
-		Scene() 
-			: camera(nullptr)
-			, hdrData(nullptr) 
-		{
-			sceneBvh = new RadeonRays::Bvh(10.0f, 64, false);
-		}
+		Scene();
 
-		~Scene() 
-		{ 
-			if (camera) 
-			{
-				delete camera; 
-				camera = nullptr;
-			}
-			
-			if (sceneBvh)
-			{
-				delete sceneBvh; 
-				sceneBvh = nullptr;
-			}
-			
-			if (hdrData)
-			{
-				delete hdrData;
-				hdrData = nullptr;
-			}
-		}
+		~Scene();
 
 		void AddCamera(glm::vec3 eye, glm::vec3 lookat, float fov);
 		int AddMesh(const std::string &filename);
@@ -72,6 +48,7 @@ namespace GLSLPT
 	private:
 		void CreateBLAS();
 		void CreateTLAS();
+		void LoadAssets();
 
 	public:
 		// Options
@@ -104,6 +81,8 @@ namespace GLSLPT
 		int texHeight;
 		Bounds3D sceneBounds;
 		bool instancesModified = false;
+		// thread pool
+		TaskThreadPool* taskPool = nullptr;
 
 	private:
 		RadeonRays::Bvh* sceneBvh;

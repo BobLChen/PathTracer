@@ -4,11 +4,45 @@
 #include "Scene.h"
 #include "Camera.h"
 
-#include "job/TaskThreadPool.h"
-#include "job/ThreadTask.h"
-
 namespace GLSLPT
 {
+	Scene::Scene() 
+		: camera(nullptr)
+		, hdrData(nullptr) 
+	{
+		sceneBvh = new RadeonRays::Bvh(10.0f, 64, false);
+
+		taskPool = new TaskThreadPool();
+		taskPool->Create(std::max((int)std::thread::hardware_concurrency(), 8));
+	}
+
+	Scene::~Scene() 
+	{ 
+		if (camera) 
+		{
+			delete camera; 
+			camera = nullptr;
+		}
+
+		if (sceneBvh)
+		{
+			delete sceneBvh; 
+			sceneBvh = nullptr;
+		}
+
+		if (hdrData)
+		{
+			delete hdrData;
+			hdrData = nullptr;
+		}
+		
+		if (taskPool)
+		{
+			delete taskPool;
+			taskPool = nullptr;
+		}
+	}
+
     void Scene::AddCamera(glm::vec3 pos, glm::vec3 lookAt, float fov)
     {
 		if (camera) 
@@ -23,24 +57,15 @@ namespace GLSLPT
 	{
 		for (int i = 0; i < meshes.size(); ++i) 
 		{
-			if (meshes[i]->meshName == filename) {
+			if (meshes[i]->name == filename) {
 				return i;
 			}
 		}
 
-		int id = -1;
-		Mesh *mesh = new Mesh;
-
-		if (mesh->LoadFromFile(filename))
-		{
-			id = meshes.size();
-			meshes.push_back(mesh);
-		}
-		else
-		{
-			delete mesh;
-			id = -1;
-		}
+		int id = meshes.size();
+		Mesh* mesh = new Mesh;
+		mesh->name = filename;
+		meshes.push_back(mesh);
 
 		return id;
 	}
@@ -54,20 +79,10 @@ namespace GLSLPT
 			}
 		}
 
-		int id = -1;
-		Texture *texture = new Texture;
-
-		if (texture->LoadTexture(filename))
-		{
-			id = textures.size();
-			textures.push_back(texture);
-			printf("Texture %s loaded\n", filename.c_str());
-		}
-		else
-		{
-			id = -1;
-			delete texture;
-		}
+		int id = textures.size();
+		Texture* texture = new Texture();
+		texture->name = filename;
+		textures.push_back(texture);
 
 		return id;
 	}
@@ -111,6 +126,98 @@ namespace GLSLPT
 		int id = lights.size();
 		lights.push_back(light);
 		return id;
+	}
+
+	void Scene::LoadAssets()
+	{
+		class MeshLoadJob : public ThreadTask
+		{
+		public:
+			MeshLoadJob(Mesh* inMesh)
+				: mesh(inMesh)
+				, done(false)
+			{
+
+			}
+
+			virtual void DoThreadedWork() override
+			{
+				mesh->LoadFromFile(mesh->name);
+				done = true;
+			}
+
+			virtual void Abandon() override
+			{
+
+			}
+
+			bool done;
+			Mesh* mesh;
+		};
+
+		class TextureLoadJob : public ThreadTask
+		{
+		public:
+			TextureLoadJob(Texture* inTexture)
+				: texture(inTexture)
+				, done(false)
+			{
+
+			}
+
+			virtual void DoThreadedWork() override
+			{
+				texture->LoadTexture(texture->name);
+				done = true;
+			}
+
+			virtual void Abandon() override
+			{
+
+			}
+
+			bool done;
+			Texture* texture;
+		};
+
+		printf("Loading assets ...\n");
+
+		std::vector<MeshLoadJob*> meshJobs(meshes.size());
+		for (int i = 0; i < meshes.size(); ++i) {
+			meshJobs[i] = new MeshLoadJob(meshes[i]);
+			taskPool->AddTask(meshJobs[i]);
+		}
+
+		std::vector<TextureLoadJob*> textureJobs(textures.size());
+		for (int i = 0; i < textures.size(); ++i) {
+			textureJobs[i] = new TextureLoadJob(textures[i]);
+			taskPool->AddTask(textureJobs[i]);
+		}
+
+		while (meshJobs.size() + textureJobs.size() > 0)
+		{
+			for (int i = meshJobs.size() - 1; i >= 0; --i)
+			{
+				if (meshJobs[i]->done)
+				{
+					printf("Mesh %s loaded.\n", meshJobs[i]->mesh->name.c_str());
+					delete meshJobs[i];
+					meshJobs.erase(meshJobs.begin() + i);
+				}
+			}
+
+			for (int i = textureJobs.size() - 1; i >= 0; --i)
+			{
+				if (textureJobs[i]->done)
+				{
+					printf("Texture %s loaded.\n", textureJobs[i]->texture->name.c_str());
+					delete textureJobs[i];
+					textureJobs.erase(textureJobs.begin() + i);
+				}
+			}
+		}
+
+		printf("Scene assets loaded.\n");
 	}
 
 	void Scene::CreateTLAS()
@@ -162,7 +269,6 @@ namespace GLSLPT
 			BuildBVHJob(Mesh* inMesh)
 				: mesh(inMesh)
 				, done(false)
-				, checked(false)
 			{
 
 			}
@@ -179,34 +285,30 @@ namespace GLSLPT
 			}
 
 			bool done;
-			bool checked;
 			Mesh* mesh;
 		};
 
 		printf("Building bottom level bvh...\n");
 
-		TaskThreadPool taskPool;
-		taskPool.Create(std::max((int)std::thread::hardware_concurrency(), 8));
-
 		// Loop through all meshes and build BVHs
 		std::vector<BuildBVHJob*> jobs(meshes.size());
 		for (int i = 0; i < meshes.size(); i++) {
 			jobs[i] = new BuildBVHJob(meshes[i]);
+			taskPool->AddTask(jobs[i]);
 		}
 
-		for (int i = 0; i < jobs.size(); ++i) {
-			taskPool.AddTask(jobs[i]);
+		while (jobs.size() > 0)
+		{
+			for (int i = jobs.size() - 1; i >= 0; --i)
+			{
+				if (jobs[i]->done) 
+				{
+					printf("Mesh %s bvh build complete.\n", jobs[i]->mesh->name.c_str());
+					delete jobs[i];
+					jobs.erase(jobs.begin() + i);
+				}
+			}
 		}
-
-		int total = jobs.size();
-		while (taskPool.GetNumQueuedJobs() != 0) {
-			// wait
-		}
-		
-		for (int i = 0; i < jobs.size(); ++i) {
-			delete jobs[i];
-		}
-		jobs.clear();
 	}
 	
 	void Scene::RebuildInstancesData()
@@ -222,7 +324,7 @@ namespace GLSLPT
 		CreateTLAS();
 		bvhTranslator.UpdateTLAS(sceneBvh, meshInstances);
 		
-		//Copy transforms
+		// Copy transforms
 		for (int i = 0; i < meshInstances.size(); i++) {
 			transforms[i] = meshInstances[i].transform;
 		}
@@ -232,6 +334,8 @@ namespace GLSLPT
 
 	void Scene::CreateAccelerationStructures()
 	{
+		LoadAssets();
+
 		CreateBLAS();
 
 		printf("Building scene BVH\n");
@@ -242,7 +346,7 @@ namespace GLSLPT
 
 		int verticesCnt = 0;
 
-		//Copy mesh data
+		// Copy mesh data
 		for (int i = 0; i < meshes.size(); i++)
 		{
 			// Copy indices from BVH and not from Mesh
@@ -280,13 +384,13 @@ namespace GLSLPT
 			vertIndices[i].z = ((vertIndices[i].z % triDataTexWidth) << 12) | (vertIndices[i].z / triDataTexWidth);
 		}
 
-		//Copy transforms
+		// Copy transforms
 		transforms.resize(meshInstances.size());
 		for (int i = 0; i < meshInstances.size(); i++) {
 			transforms[i] = meshInstances[i].transform;
 		}
 		
-		//Copy Textures
+		// Copy Textures
 		for (int i = 0; i < textures.size(); i++)
 		{
 			texWidth = textures[i]->width;
