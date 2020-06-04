@@ -34,6 +34,11 @@ make
 - Support for different light types
 - Support for different material model
 
+## Sample Scenes
+These assets modified from the origin repo.
+Link to origin repo:https://github.com/knightcrawler25/GLSL-PathTracer
+Assets:https://drive.google.com/file/d/1SK9fRyzvpHBNBFb0Gc6nDvDkH7AHVj6H/view?usp=sharing
+
 ## Screenshots
 
 ![Stormtrooper](./screenshots/stormtrooper.jpg)
