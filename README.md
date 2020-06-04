@@ -36,24 +36,24 @@ make
 
 ## Screenshots
 
-![Stormtrooper](./screenshots/stormtrooper.png)
+![Stormtrooper](./screenshots/stormtrooper.jpg)
 
-![Hyperion](./screenshots/hyperion.png)
+![Hyperion](./screenshots/hyperion.jpg)
 
-![Panther](./screenshots/panther.png)
+![Panther](./screenshots/panther.jpg)
 
-![Crown](./screenshots/crown.png)
+![Crown](./screenshots/crown.jpg)
 
-![Ajax](./screenshots/ajax_materials.png)
+![Ajax](./screenshots/ajax_materials.jpg)
 
-![Dining Room](./screenshots/DiningRoom.png)
+![Dining Room](./screenshots/DiningRoom.jpg)
 
-![Rank3PoliceUnit](./screenshots/rank3police_color_corrected.png)
+![Rank3PoliceUnit](./screenshots/rank3police_color_corrected.jpg)
 
-![Staircase](./screenshots/staircase.png)
+![Staircase](./screenshots/staircase.jpg)
 
-![Substance Boy](./screenshots/MeetMat_Maps.png)
+![Substance Boy](./screenshots/MeetMat_Maps.jpg)
 
-![City](./screenshots/city.png)
+![City](./screenshots/city.jpg)
 
-![Dragon](./screenshots/dragon.png)
+![Dragon](./screenshots/dragon.jpg)

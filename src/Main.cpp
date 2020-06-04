@@ -48,16 +48,7 @@ void LoadSampleScene(int index)
 			LoadSceneFromFile(path + "assets/hyperion.scene", scene, renderOptions);
 			break;
 		case 1:	
-			LoadAjaxTestScene(path, scene, renderOptions);
-			break;
-		case 2: 
-			LoadBoyTestScene(path, scene, renderOptions);
-			break;
-		case 3:	
 			LoadSceneFromFile(path + "assets/cornell_box.scene", scene, renderOptions);
-			break;
-		case 4:	
-			LoadSceneFromFile(path + "assets/teapot.scene", scene, renderOptions);
 			break;
 	}
 
@@ -190,7 +181,7 @@ void OnGUI(float deltaTime)
 	ImGui::BulletText("MMB + drag to rotate");
 	ImGui::BulletText("SHIFT + MMB + drag to pan");
 
-	if (ImGui::Combo("Scene", &sampleSceneIndex, "Hyperion\0Ajax Bust\0Substance Boy\0Cornell Box\0Teapot\0"))
+	if (ImGui::Combo("Scene", &sampleSceneIndex, "Hyperion\0Cornell Box\0"))
 	{
 		LoadSampleScene(sampleSceneIndex);
 		InitRenderer();
@@ -419,7 +410,7 @@ bool InitScene(const std::string& scenefile)
 {
 	if (scenefile.empty())
 	{
-		sampleSceneIndex = 3;
+		sampleSceneIndex = 0;
 		LoadSampleScene(sampleSceneIndex);
 	}
 	else
