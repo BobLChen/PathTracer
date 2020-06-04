@@ -6,12 +6,16 @@
 #include "math/Math.h"
 
 namespace GLSLPT
-{	
+{
 	class Texture
 	{
 	public:
 		Texture() 
-			: texData(nullptr) 
+			: width(-1) 
+			, height(-1)
+			, comp(3)
+			, loaded(false)
+			, texData(nullptr)
 		{
 
 		}
@@ -29,7 +33,10 @@ namespace GLSLPT
 		
 		int width;
 		int height;
+		int comp;
 		std::string name;
+
+		bool loaded;
 
 		uint8* texData;
 	};

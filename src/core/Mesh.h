@@ -11,6 +11,7 @@ namespace GLSLPT
 	{
 	public:
 		Mesh()
+			: loaded(false)
 		{ 
 			bvh = new RadeonRays::SplitBvh(2.0f, 64, 0, 0.001f, 2.5f); 
 		}
@@ -24,17 +25,18 @@ namespace GLSLPT
 			}
 		}
 		
-	public:
+		void BuildBVH();
 
+		bool LoadFromFile(const std::string& filename);
+
+	public:
 		// Mesh Data
 		std::vector<glm::vec4> verticesUVX;
 		std::vector<glm::vec4> normalsUVY;
 
-		RadeonRays::Bvh *bvh;
+		RadeonRays::Bvh* bvh;
 		std::string name;
-
-		void BuildBVH();
-		bool LoadFromFile(const std::string& filename);
+		bool loaded;
 	};
 
 	class MeshInstance

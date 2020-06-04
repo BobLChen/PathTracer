@@ -55,7 +55,8 @@ add_subdirectory(external/glad)
 add_subdirectory(external/imgui)
 add_subdirectory(external/imguizmo)
 
-file(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/assets/*.*")
+# *.cpp *.h */*.h */*.cpp
+file(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.*" "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*/*.*")
 foreach(file ${files})
 	SET(ASSETS
 		${ASSETS}

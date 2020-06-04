@@ -36,12 +36,14 @@ namespace GLSLPT
 		~Scene();
 
 		void AddCamera(glm::vec3 eye, glm::vec3 lookat, float fov);
-		int AddMesh(const std::string &filename);
-		int AddTexture(const std::string &filename);
-		int AddMaterial(const Material &material);
-		int AddMeshInstance(const MeshInstance &meshInstance);
-		int AddLight(const Light &light);
-		void AddHDR(const std::string &filename);
+		int AddMesh(const std::string& filename);
+		int AddMesh(Mesh* mesh);
+		int AddTexture(const std::string& filename);
+		int AddTexture(const std::string& filename, unsigned char* data, int width, int height, int comp);
+		int AddMaterial(const Material& material);
+		int AddMeshInstance(const MeshInstance& meshInstance);
+		int AddLight(const Light& light);
+		void AddHDR(const std::string& filename);
 		void CreateAccelerationStructures();
 		void RebuildInstancesData();
 

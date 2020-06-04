@@ -10,6 +10,7 @@ namespace GLSLPT
 	bool Mesh::LoadFromFile(const std::string& filename)
 	{
 		name = filename;
+		loaded = true;
 
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;

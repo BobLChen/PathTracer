@@ -53,6 +53,13 @@ namespace GLSLPT
         camera = new Camera(pos, lookAt, fov);
     }
 
+	int Scene::AddMesh(Mesh* mesh)
+	{
+		int id = meshes.size();
+		meshes.push_back(mesh);
+		return id;
+	}
+
 	int Scene::AddMesh(const std::string& filename)
 	{
 		for (int i = 0; i < meshes.size(); ++i) 
@@ -66,6 +73,28 @@ namespace GLSLPT
 		Mesh* mesh = new Mesh;
 		mesh->name = filename;
 		meshes.push_back(mesh);
+
+		return id;
+	}
+
+	int Scene::AddTexture(const std::string& filename, unsigned char* data, int width, int height, int comp)
+	{
+		for (int i = 0; i < textures.size(); ++i)
+		{
+			if (textures[i]->name == filename) {
+				return i;
+			}
+		}
+
+		int id = textures.size();
+		Texture* texture = new Texture();
+		texture->name    = filename;
+		texture->width   = width;
+		texture->height  = height;
+		texture->texData = data;
+		texture->comp    = comp;
+		texture->loaded  = true;
+		textures.push_back(texture);
 
 		return id;
 	}
@@ -184,14 +213,20 @@ namespace GLSLPT
 
 		std::vector<MeshLoadJob*> meshJobs(meshes.size());
 		for (int i = 0; i < meshes.size(); ++i) {
-			meshJobs[i] = new MeshLoadJob(meshes[i]);
-			taskPool->AddTask(meshJobs[i]);
+			if (!meshes[i]->loaded) 
+			{
+				meshJobs[i] = new MeshLoadJob(meshes[i]);
+				taskPool->AddTask(meshJobs[i]);
+			}
 		}
 
 		std::vector<TextureLoadJob*> textureJobs(textures.size());
 		for (int i = 0; i < textures.size(); ++i) {
-			textureJobs[i] = new TextureLoadJob(textures[i]);
-			taskPool->AddTask(textureJobs[i]);
+			if (!textures[i]->loaded)
+			{
+				textureJobs[i] = new TextureLoadJob(textures[i]);
+				taskPool->AddTask(textureJobs[i]);
+			}
 		}
 
 		while (meshJobs.size() + textureJobs.size() > 0)

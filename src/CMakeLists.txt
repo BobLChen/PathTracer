@@ -43,10 +43,14 @@ set(PARSER_HDRS
     parser/SceneLoader.h
     parser/HDRLoader.h
     parser/tiny_obj_loader.h
+    parser/tiny_gltf.h
+    parser/json.hpp
+    parser/GLBLoader.h
 )
 set(PARSER_SRCS
     parser/SceneLoader.cpp
     parser/HDRLoader.cpp
+    parser/GLBLoader.cpp
 )
 
 set(MATH_HDRS
