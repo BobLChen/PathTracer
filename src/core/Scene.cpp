@@ -1,7 +1,11 @@
 #include <iostream>
+#include <algorithm>
 
 #include "Scene.h"
 #include "Camera.h"
+
+#include "job/TaskThreadPool.h"
+#include "job/ThreadTask.h"
 
 namespace GLSLPT
 {
@@ -152,12 +156,57 @@ namespace GLSLPT
 
 	void Scene::CreateBLAS()
 	{
-		// Loop through all meshes and build BVHs
-		for (int i = 0; i < meshes.size(); i++)
+		class BuildBVHJob : public ThreadTask
 		{
-			printf("Building BVH for %s\n", meshes[i]->meshName.c_str());
-			meshes[i]->BuildBVH();
+		public:
+			BuildBVHJob(Mesh* inMesh)
+				: mesh(inMesh)
+				, done(false)
+				, checked(false)
+			{
+
+			}
+
+			virtual void DoThreadedWork() override
+			{
+				mesh->BuildBVH();
+				done = true;
+			}
+
+			virtual void Abandon() override
+			{
+
+			}
+
+			bool done;
+			bool checked;
+			Mesh* mesh;
+		};
+
+		printf("Building bottom level bvh...\n");
+
+		TaskThreadPool taskPool;
+		taskPool.Create(std::max((int)std::thread::hardware_concurrency(), 8));
+
+		// Loop through all meshes and build BVHs
+		std::vector<BuildBVHJob*> jobs(meshes.size());
+		for (int i = 0; i < meshes.size(); i++) {
+			jobs[i] = new BuildBVHJob(meshes[i]);
 		}
+
+		for (int i = 0; i < jobs.size(); ++i) {
+			taskPool.AddTask(jobs[i]);
+		}
+
+		int total = jobs.size();
+		while (taskPool.GetNumQueuedJobs() != 0) {
+			// wait
+		}
+		
+		for (int i = 0; i < jobs.size(); ++i) {
+			delete jobs[i];
+		}
+		jobs.clear();
 	}
 	
 	void Scene::RebuildInstancesData()

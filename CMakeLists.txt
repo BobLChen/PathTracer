@@ -31,6 +31,13 @@ set(ALL_LIBS
 	imguizmo
 )
 
+if (NOT WIN32)
+	set(ALL_LIBS
+		${ALL_LIBS}
+		pthread
+	)
+endif()
+
 include_directories(
 	src/
 	external/glm/

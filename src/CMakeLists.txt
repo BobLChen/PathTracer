@@ -66,6 +66,23 @@ set(TEST_SRCS
 
 )
 
+set(JOB_HDRS
+    job/Runnable.h
+    job/RunnableThread.h
+    job/TaskThread.h
+    job/TaskThreadPool.h
+    job/ThreadEvent.h
+    job/ThreadManager.h
+    job/ThreadTask.h
+)
+set(JOB_SRCS
+    job/RunnableThread.cpp
+    job/TaskThread.cpp
+    job/TaskThreadPool.cpp
+    job/ThreadEvent.cpp
+    job/ThreadManager.cpp
+)
+
 add_library(Core STATIC
 	${BVH_HDRS}
 	${BVH_SRCS}
@@ -81,8 +98,12 @@ add_library(Core STATIC
 
     ${TEST_HDRS}
     ${TEST_SRCS}
+
+    ${JOB_HDRS}
+    ${JOB_SRCS}
 )
 
+source_group(src\\job FILES ${JOB_HDRS} ${JOB_SRCS})
 source_group(src\\test FILES ${TEST_HDRS} ${TEST_SRCS})
 source_group(src\\math FILES ${MATH_SRCS} ${MATH_HDRS})
 source_group(src\\parser FILES ${PARSER_SRCS} ${PARSER_HDRS})
