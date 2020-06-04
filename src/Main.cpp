@@ -172,6 +172,8 @@ void OnGUI(float deltaTime)
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
+	ImGuizmo::SetOrthographic(true);
+	ImGuizmo::BeginFrame();
 
 	ImGui::Begin("Settings");
 

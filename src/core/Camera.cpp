@@ -181,8 +181,8 @@ namespace GLSLPT
 	{
 		auto at = position + forward;
 		LookAt(&position.x, &at.x, &up.x, view);
-		float fov = (1.f / ratio) * tanf(fov / 2.f);
-		Perspective(glm::degrees(fov), ratio, 0.1f, 1000.f, projection);
+		float rfov = (1.f / ratio) * tanf(fov / 2.f);
+		Perspective(glm::degrees(rfov), ratio, 0.1f, 1000.f, projection);
 	}
 
 }
