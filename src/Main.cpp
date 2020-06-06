@@ -22,7 +22,6 @@
 
 using namespace GLSLPT;
 
-float			mouseSensitivity = 1.0f;
 int				sampleSceneIndex = -1;
 int				selectedInstance = 0;
 double			lastTime = 0;
@@ -43,7 +42,7 @@ void LoadSampleScene(int index)
 	}
 	scene = new Scene();
 
-    switch (index)
+    /*switch (index)
     {
 	case 0:
 		LoadSceneFromFile(path + "assets/hyperion.scene", scene, renderOptions);
@@ -54,9 +53,9 @@ void LoadSampleScene(int index)
 	case 2:
 		LoadBoyTestScene(path, scene, renderOptions);
 		break;
-    }
+    }*/
 
-	// LoadSceneFromGLTF(path + "assets/diorama.glb", scene, renderOptions);
+	LoadSceneFromGLTF(path + "assets/diorama.glb", scene, renderOptions);
 
 	selectedInstance = 0;
     scene->renderOptions = renderOptions;
@@ -209,6 +208,8 @@ void OnGUI(float deltaTime)
 	if (ImGui::CollapsingHeader("Render Settings"))
 	{
 		optionsChanged |= ImGui::SliderInt("Max Depth", &renderOptions.maxDepth, 1, 10);
+		optionsChanged |= ImGui::SliderInt("NumTilesX", &renderOptions.numTilesX, 1, 32);
+		optionsChanged |= ImGui::SliderInt("NumTilesY", &renderOptions.numTilesY, 1, 32);
 		optionsChanged |= ImGui::Checkbox("Use envmap", &renderOptions.useEnvMap);
 		optionsChanged |= ImGui::SliderFloat("HDR multiplier", &renderOptions.intensity, 0.1, 10);
 	}

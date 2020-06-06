@@ -391,8 +391,6 @@ namespace GLSLPT
 
 	void Scene::CreateAccelerationStructures()
 	{
-		camera->Perspective(camera->GetFov(), renderOptions.resolution.x, renderOptions.resolution.y, 0.1f, 3000.0f);
-
 		LoadAssets();
 
 		CreateBLAS();

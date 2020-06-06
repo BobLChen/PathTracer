@@ -17,6 +17,50 @@
 
 namespace GLSLPT
 {
+	struct GLTFBounds
+	{
+		Vector3 min;
+		Vector3 max;
+		Vector3 corners[8];
+
+		GLTFBounds()
+			: min(+MAX_int16, +MAX_int16, +MAX_int16)
+			, max(-MAX_int16, -MAX_int16, -MAX_int16)
+		{
+
+		}
+
+		GLTFBounds(const GLTFBounds& bounds)
+			: min(bounds.min)
+			, max(bounds.max)
+		{
+
+		}
+
+		Vector3 Center() const
+		{
+			return (min + max) * 0.5f;
+		}
+
+		Vector3 Extents() const
+		{
+			return max - min;
+		}
+
+		void UpdateCorners()
+		{
+			corners[0].Set(min.x, min.y, min.z);
+			corners[1].Set(max.x, min.y, min.z);
+			corners[2].Set(min.x, max.y, min.z);
+			corners[3].Set(max.x, max.y, min.z);
+
+			corners[4].Set(min.x, min.y, max.z);
+			corners[5].Set(max.x, min.y, max.z);
+			corners[6].Set(min.x, max.y, max.z);
+			corners[7].Set(max.x, max.y, max.z);
+		}
+	};
+
 	struct GLTFNode
 	{
 		GLTFNode*	parent = nullptr;
@@ -24,6 +68,7 @@ namespace GLSLPT
 		int			materialID = -1;
 		std::string name;
 		Matrix4x4	matrix;
+		GLTFBounds	bounds;
 
 		Matrix4x4 WorldMatrix()
 		{
@@ -34,7 +79,7 @@ namespace GLSLPT
 			return transform;
 		}
 	};
-	
+
 	void LoadGLTFNode(GLTFNode* parent, tinygltf::Node& gltfNode, tinygltf::Model &gltfModel, std::vector<GLTFNode*>& nodes)
 	{
 		GLTFNode* node = new GLTFNode();
@@ -81,7 +126,7 @@ namespace GLSLPT
 				node->matrix.AppendTranslation(Vector3(gltfNode.translation[0], gltfNode.translation[1], gltfNode.translation[2]));
 			}
 		}
-		
+
 		if (gltfNode.mesh > -1) 
 		{
 			node->meshID = gltfNode.mesh;
@@ -174,14 +219,16 @@ namespace GLSLPT
 		// load meshes
 		struct GLTFMesh
 		{
-			int mesh;
-			int meshID;
-			int materialID;
+			int			mesh;
+			int			meshID;
+			int			materialID;
+			GLTFBounds	bounds;
 
-			GLTFMesh(int id, int inMesh, int inMaterial)
+			GLTFMesh(int id, int inMesh, int inMaterial, const GLTFBounds& inBounds)
 				: mesh(id)
 				, meshID(inMesh)
 				, materialID(inMaterial)
+				, bounds(inBounds)
 			{
 
 			}
@@ -199,6 +246,7 @@ namespace GLSLPT
 				std::vector<Vector4> verticesUVX;
 				std::vector<Vector4> normalsUVY;
 				std::vector<int>     indices;
+				GLTFBounds           bounds;
 
 				tinygltf::Accessor& posAccessor = gltfModel.accessors[primitive.attributes.find("POSITION")->second];
 				tinygltf::BufferView& posView   = gltfModel.bufferViews[posAccessor.bufferView];
@@ -231,6 +279,10 @@ namespace GLSLPT
 						pos.y = 0;
 						pos.z = 0;
 					}
+
+					bounds.min = Vector3::Min(bounds.min, pos);
+					bounds.max = Vector3::Max(bounds.max, pos);
+
 					// uv
 					if (bufferUV0)
 					{
@@ -300,7 +352,7 @@ namespace GLSLPT
 
 				int meshID = scene->AddMesh(mesh);
 				int matID  = materials[primitive.material];
-				meshes.push_back(GLTFMesh(i, meshID, matID));
+				meshes.push_back(GLTFMesh(i, meshID, matID, bounds));
 			}
 		}
 
@@ -315,6 +367,7 @@ namespace GLSLPT
 		}
 
 		// instances
+		GLTFBounds sceneBounds;
 		for (int i = 0; i < nodeList.size(); ++i)
 		{
 			GLTFNode* node = nodeList[i];
@@ -327,13 +380,28 @@ namespace GLSLPT
 				GLTFMesh& mesh = meshes[j];
 				if (mesh.mesh == node->meshID)
 				{
-					scene->AddMeshInstance(MeshInstance(mesh.meshID, node->WorldMatrix(), mesh.materialID, node->name));
+					Matrix4x4& matrix = node->WorldMatrix();
+
+					// add to instance
+					scene->AddMeshInstance(MeshInstance(mesh.meshID, matrix, mesh.materialID, node->name));
+
+					// calc world bounds
+					GLTFBounds& bounds = mesh.bounds;
+					bounds.UpdateCorners();
+					for (int b = 0; b < 8; ++b)
+					{
+						Vector3 vec = matrix.TransformPosition(bounds.corners[b]);
+						sceneBounds.min = Vector3::Min(sceneBounds.min, vec);
+						sceneBounds.max = Vector3::Max(sceneBounds.max, vec);
+					}
+
 					break;
 				}
 			}
 		}
 
-		for (int i = 0; i < nodeList.size(); ++i) {
+		for (int i = 0; i < nodeList.size(); ++i) 
+		{
 			delete nodeList[i];
 		}
 
@@ -343,7 +411,12 @@ namespace GLSLPT
 		renderOptions.intensity = 1.0f;
 		renderOptions.useEnvMap = true;
 
-		scene->AddCamera(Vector3(0.0f, 10.0f, -10.0f), Vector3(0.0f, 0.0f, 0.0f), 60.0f);
+		// fit scene
+		Vector3 center = sceneBounds.Center();
+		Vector3 extent = sceneBounds.Extents();
+		Vector3 eye    = Vector3(center.x, center.y, center.z + extent.Size() * 1.0f);
+		Vector3 at     = center;
+		scene->AddCamera(eye, at, 60.0f);
 
 		scene->AddHDR(std::string(EMBED_RES_PATH) + "assets/HDR/photo_studio_01_1k.hdr");
 

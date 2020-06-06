@@ -203,8 +203,8 @@ namespace GLSLPT
 		float		speed = 1.0f;
 		float		speedFactor = 0.5f;
 
-		float		focalDist = 0.0;
-		float		aperture = 0.0;
+		float		focalDist = 1.0f;
+		float		aperture = 0.0f;
 
 		bool        isMoving = false;
 
