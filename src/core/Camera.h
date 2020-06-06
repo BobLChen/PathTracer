@@ -1,13 +1,13 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include "math/Vector3.h"
 
 namespace GLSLPT
 {
 	class Camera
 	{
 	public:
-		Camera(const glm::vec3& eye, const glm::vec3& lookat, float fov);
+		Camera(const Vector3& eye, const Vector3& lookat, float fov);
 
 		Camera(const Camera& other);
 
@@ -20,12 +20,12 @@ namespace GLSLPT
 		void ComputeViewProjectionMatrix(float* view, float* projection, float ratio);
 		void SetFov(float val);
 
-		glm::vec3 position;
-		glm::vec3 pivot;
-		glm::vec3 up;
-		glm::vec3 right;
-		glm::vec3 forward;
-		glm::vec3 worldUp;
+		Vector3 position;
+		Vector3 pivot;
+		Vector3 up;
+		Vector3 right;
+		Vector3 forward;
+		Vector3 worldUp;
 
 		float pitch;
 		float yaw;

@@ -56,13 +56,18 @@ set(PARSER_SRCS
 set(MATH_HDRS
     math/Bounds3D.h
     math/Math.h
+    math/Axis.h
+    math/Vector2.h
+    math/Vector3.h
+    math/Vector4.h
+    math/Matrix4x4.h
+    math/Quat.h
 )
 set(MATH_SRCS
-
+    math/Math.cpp
 )
 
 set(TEST_HDRS
-    test/AjaxTestScene.h
     test/BoyTestScene.h
     test/CornellTestScene.h
 )

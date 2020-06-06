@@ -98,10 +98,10 @@ namespace GLSLPT
 		GenTexture2D(normalsTex,  GL_RGBA32F, GL_RGBA, GL_FLOAT, scene->triDataTexWidth, scene->triDataTexWidth, &scene->normalsUVY[0]);
 
 		// Create texture for Materials
-		GenTexture2D(materialsTex,  GL_RGBA32F, GL_RGBA, GL_FLOAT, (sizeof(Material) / sizeof(glm::vec4)) * scene->materials.size(), 1, &scene->materials[0]);
+		GenTexture2D(materialsTex,  GL_RGBA32F, GL_RGBA, GL_FLOAT, (sizeof(Material) / sizeof(Vector4)) * scene->materials.size(), 1, &scene->materials[0]);
 
 		// Create texture for Transforms
-		GenTexture2D(transformsTex,  GL_RGBA32F, GL_RGBA, GL_FLOAT, (sizeof(glm::mat4) / sizeof(glm::vec4)) * scene->transforms.size(), 1, &scene->transforms[0]);
+		GenTexture2D(transformsTex,  GL_RGBA32F, GL_RGBA, GL_FLOAT, (sizeof(Matrix4x4) / sizeof(Vector4)) * scene->transforms.size(), 1, &scene->transforms[0]);
 
 		// Create Buffer and Texture for Lights
 		numOfLights = int(scene->lights.size());
@@ -109,7 +109,7 @@ namespace GLSLPT
 		if (numOfLights > 0)
 		{
 			// Create texture for lights
-			GenTexture2D(lightsTex,  GL_RGB32F, GL_RGB, GL_FLOAT, (sizeof(Light) / sizeof(glm::vec3)) * scene->lights.size(), 1, &scene->lights[0]);
+			GenTexture2D(lightsTex,  GL_RGB32F, GL_RGB, GL_FLOAT, (sizeof(Light) / sizeof(Vector3)) * scene->lights.size(), 1, &scene->lights[0]);
 		}
 
 		if (scene->textures.size() > 0)
@@ -144,10 +144,10 @@ namespace GLSLPT
 		if (scene->instancesModified)
 		{
 			glBindTexture(GL_TEXTURE_2D, transformsTex);
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, (sizeof(glm::mat4) / sizeof(glm::vec4)) * scene->transforms.size(), 1, GL_RGBA, GL_FLOAT, &scene->transforms[0]);
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, (sizeof(Matrix4x4) / sizeof(Vector4)) * scene->transforms.size(), 1, GL_RGBA, GL_FLOAT, &scene->transforms[0]);
 
 			glBindTexture(GL_TEXTURE_2D, materialsTex);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, (sizeof(Material) / sizeof(glm::vec4)) * scene->materials.size(), 1, 0, GL_RGBA, GL_FLOAT, &scene->materials[0]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, (sizeof(Material) / sizeof(Vector4)) * scene->materials.size(), 1, 0, GL_RGBA, GL_FLOAT, &scene->materials[0]);
 
 			int yPos  = scene->bvhTranslator.topLevelIndexPackedXY & 0x00000FFF;
 			int index = yPos * scene->bvhTranslator.nodeTexWidth;

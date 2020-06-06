@@ -35,15 +35,18 @@ namespace RadeonRays
     public:
         Bvh(float traversalCost, int numBins = 64, bool usesah = false)
             : m_Root(nullptr)
-            , m_NumBins(numBins)
             , m_Usesah(usesah)
             , m_Height(0)
             , m_TraversalCost(traversalCost)
+            , m_NumBins(numBins)
         {
-
+            
         }
 
-        ~Bvh() = default;
+        virtual ~Bvh()
+        {
+            
+        }
 
 		// Build function
 		// bounds is an array of bounding boxes
@@ -148,9 +151,9 @@ namespace RadeonRays
 
         virtual void InitNodeAllocator(size_t maxnum);
 
-        void BuildNode(const SplitRequest& req, const Bounds3D* bounds, const glm::vec3* centroids, int* primindices);
+        void BuildNode(const SplitRequest& req, const Bounds3D* bounds, const Vector3* centroids, int* primindices);
 
-        SahSplit FindSahSplit(const SplitRequest& req, const Bounds3D* bounds, const glm::vec3* centroids, int* primindices) const;
+        SahSplit FindSahSplit(const SplitRequest& req, const Bounds3D* bounds, const Vector3* centroids, int* primindices) const;
 
         // Bvh nodes
         std::vector<Node> m_Nodes;

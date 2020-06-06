@@ -1,6 +1,5 @@
 #pragma once
 
-#include <glm/glm.hpp>
 #include <string>
 #include <vector>
 #include <map>
@@ -16,6 +15,7 @@
 #include "bvh/BvhTranslator.h"
 #include "parser/HDRLoader.h"
 #include "math/Math.h"
+#include "math/Vector4.h"
 #include "job/TaskThreadPool.h"
 #include "job/ThreadTask.h"
 
@@ -35,7 +35,7 @@ namespace GLSLPT
 
 		~Scene();
 
-		void AddCamera(glm::vec3 eye, glm::vec3 lookat, float fov);
+		void AddCamera(Vector3 eye, Vector3 lookat, float fov);
 		int AddMesh(const std::string& filename);
 		int AddMesh(Mesh* mesh);
 		int AddTexture(const std::string& filename);
@@ -51,7 +51,7 @@ namespace GLSLPT
 		void CreateBLAS();
 		void CreateTLAS();
 		void LoadAssets();
-
+		
 	public:
 		// Options
 		RenderOptions renderOptions;
@@ -68,9 +68,9 @@ namespace GLSLPT
 		Camera* camera;
 		// Scene Mesh Data 
 		std::vector<Indices> vertIndices;
-		std::vector<glm::vec4> verticesUVX;
-		std::vector<glm::vec4> normalsUVY;
-		std::vector<glm::mat4> transforms;
+		std::vector<Vector4> verticesUVX;
+		std::vector<Vector4> normalsUVY;
+		std::vector<Matrix4x4> transforms;
 		// texture size
 		int indicesTexWidth;
 		int triDataTexWidth;

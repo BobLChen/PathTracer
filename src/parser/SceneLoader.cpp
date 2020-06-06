@@ -89,7 +89,6 @@ namespace GLSLPT
             if (sscanf(line, " material %s", name) == 1)
             {
                 Material material;
-                int albedoTexID, matRghTexID, nrmTexID;
                 char albedoTexName[100] = "None";
                 char metallicRoughnessTexName[100] = "None";
                 char normalTexName[100] = "None";
@@ -143,7 +142,7 @@ namespace GLSLPT
             if (strstr(line, "light"))
             {
                 Light light;
-                glm::vec3 v1, v2;
+                Vector3 v1, v2;
                 char lightType[20] = "None";
 
                 while (fgets(line, s_MAX_LINE_LENGTH, file))
@@ -167,7 +166,7 @@ namespace GLSLPT
                     light.type = LightType::QuadLight;
                     light.u = v1 - light.position;
                     light.v = v2 - light.position;
-                    light.area = glm::length(glm::cross(light.u, light.v));
+                    light.area = Vector3::CrossProduct(light.u, light.v).Size();
                 }
                 else if (strcmp(lightType, "Sphere") == 0)
                 {
@@ -182,8 +181,8 @@ namespace GLSLPT
             // Camera
             if (strstr(line, "Camera"))
             {
-                glm::vec3 position;
-                glm::vec3 lookAt;
+                Vector3 position;
+                Vector3 lookAt;
                 float fov;
                 float aperture = 0, focalDist = 1;
 
@@ -222,7 +221,7 @@ namespace GLSLPT
 					}
                     
                     sscanf(line, " envMap %s", envMap);
-                    sscanf(line, " resolution %d %d", &renderOptions.resolution.x, &renderOptions.resolution.y);
+                    sscanf(line, " resolution %f %f", &renderOptions.resolution.x, &renderOptions.resolution.y);
                     sscanf(line, " hdrMultiplier %f", &renderOptions.hdrMultiplier);
                     sscanf(line, " maxDepth %i", &renderOptions.maxDepth);
                     sscanf(line, " numTilesX %i", &renderOptions.numTilesX);
@@ -241,9 +240,9 @@ namespace GLSLPT
             if (strstr(line, "mesh"))
             {
                 std::string filename;
-                glm::vec3 pos;
-                glm::vec3 scale;
-                glm::mat4 xform;
+                Vector3 pos;
+                Vector3 scale;
+                Matrix4x4 xform;
                 int material_id = 0; // Default Material ID
 
                 while (fgets(line, s_MAX_LINE_LENGTH, file))
@@ -274,8 +273,8 @@ namespace GLSLPT
                         }
                     }
 
-                    sscanf(line, " position %f %f %f", &xform[3][0], &xform[3][1], &xform[3][2]);
-                    sscanf(line, " scale %f %f %f", &xform[0][0], &xform[1][1], &xform[2][2]);
+                    sscanf(line, " position %f %f %f", &xform.m[3][0], &xform.m[3][1], &xform.m[3][2]);
+                    sscanf(line, " scale %f %f %f", &xform.m[0][0], &xform.m[1][1], &xform.m[2][2]);
                 }
 
                 if (!filename.empty())
@@ -294,7 +293,7 @@ namespace GLSLPT
 
         // Add default camera if none was specified
 		if (!cameraAdded) {
-			scene->AddCamera(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, -10.0f), 35.0f);
+			scene->AddCamera(Vector3(0.0f, 0.0f, 10.0f), Vector3(0.0f, 0.0f, -10.0f), 35.0f);
 		}
         
         scene->CreateAccelerationStructures();

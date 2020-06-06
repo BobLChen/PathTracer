@@ -1,8 +1,9 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/transform.hpp>
+#include "math/Matrix4x4.h"
+#include "math/Vector2.h"
+#include "math/Vector3.h"
+#include "math/Vector4.h"
 
 #include "core/Scene.h"
 
@@ -15,7 +16,7 @@ namespace GLSLPT
 		renderOptions.numTilesX = 5;
 		renderOptions.hdrMultiplier = 1.0f;
 		renderOptions.useEnvMap = false;
-		scene->AddCamera(glm::vec3(0.3f, 0.11f, 0.0f), glm::vec3(0.2f, 0.095f, 0.0f), 60.0f);
+		scene->AddCamera(Vector3(0.3f, 0.11f, 0.0f), Vector3(0.2f, 0.095f, 0.0f), 60.0f);
 		scene->camera->aperture = 1e-6f; // 0.000001f;
 		scene->camera->focalDist = 0.262f;
 
@@ -51,11 +52,11 @@ namespace GLSLPT
 
 		white.albedoTexID = bgAlbedo;
 
-		gold.albedo = glm::vec3(1.0, 0.71, 0.29);
+		gold.albedo = Vector3(1.0, 0.71, 0.29);
 		gold.roughness = 0.2;
 		gold.metallic = 1.0;
 
-		red_plastic.albedo = glm::vec3(1.0, 0.0, 0.0);
+		red_plastic.albedo = Vector3(1.0, 0.0, 0.0);
 		red_plastic.roughness = 0.01;
 		red_plastic.metallic = 0.0;
 
@@ -68,38 +69,40 @@ namespace GLSLPT
 
 		Light light;
 		light.type = LightType::QuadLight;
-		light.position = glm::vec3(-0.103555f, 0.284840f, 0.606827f);
-		light.u = glm::vec3(-0.103555f, 0.465656f, 0.521355f) - light.position;
-		light.v = glm::vec3(0.096445f, 0.284840f, 0.606827f) - light.position;
-		light.area = glm::length(glm::cross(light.u, light.v));
-		light.emission = glm::vec3(40, 41, 41);
-
+		light.position = Vector3(-0.103555f, 0.284840f, 0.606827f);
+		light.u = Vector3(-0.103555f, 0.465656f, 0.521355f) - light.position;
+		light.v = Vector3(0.096445f, 0.284840f, 0.606827f) - light.position;
+		light.area = Vector3::CrossProduct(light.u, light.v).Size();
+		light.emission = Vector3(40, 41, 41);
+        
 		Light light2;
 		light2.type = LightType::QuadLight;
-		light2.position = glm::vec3(0.303145f, 0.461806f, -0.450967f);
-		light2.u = glm::vec3(0.362568f, 0.280251f, -0.510182f) - light2.position;
-		light2.v = glm::vec3(0.447143f, 0.461806f, -0.306465f) - light2.position;
-		light2.area = glm::length(glm::cross(light2.u, light2.v));
-		light2.emission = glm::vec3(40, 41, 41);
+		light2.position = Vector3(0.303145f, 0.461806f, -0.450967f);
+		light2.u = Vector3(0.362568f, 0.280251f, -0.510182f) - light2.position;
+		light2.v = Vector3(0.447143f, 0.461806f, -0.306465f) - light2.position;
+		light2.area = Vector3::CrossProduct(light2.u, light2.v).Size();
+		light2.emission = Vector3(40, 41, 41);
+        
+		scene->AddLight(light);
+		scene->AddLight(light2);
 
-		int light1_id = scene->AddLight(light);
-		int light2_id = scene->AddLight(light2);
+        Matrix4x4 xform_base;
+        xform_base.SetPosition(Vector3(0, 0.0075, 0));
+        Matrix4x4 xform_body;
+        xform_body.SetPosition(Vector3(0, 0.049, 0));
+		Matrix4x4 xform_head;
+        xform_head.SetPosition(Vector3(0.017, 0.107, 0));
 
-		glm::mat4 xform_base = glm::translate(glm::vec3(0, 0.0075, 0));
-		glm::mat4 xform_body = glm::translate(glm::vec3(0, 0.049, 0));
-		glm::mat4 xform_head = glm::translate(glm::vec3(0.017, 0.107, 0));
-
-		glm::mat4 xform1;
-		glm::mat4 xform2;
-		glm::mat4 xform3;
-		glm::mat4 xform4;
-		glm::mat4 xform5;
-
-		xform2 = glm::translate(glm::vec3(0, 0, -0.05));
-		xform3 = glm::translate(glm::vec3(0, 0,  0.05));
-		xform4 = glm::translate(glm::vec3(-0.1, 0.0, -0.15));
-		xform5 = glm::translate(glm::vec3(-0.1, 0, 0.15));
-
+		Matrix4x4 xform1;
+		Matrix4x4 xform2;
+        xform2.SetPosition(Vector3(0, 0, -0.05));
+		Matrix4x4 xform3;
+        xform3.SetPosition(Vector3(0, 0,  0.05));
+		Matrix4x4 xform4;
+        xform4.SetPosition(Vector3(-0.1, 0.0, -0.15));
+		Matrix4x4 xform5;
+        xform5.SetPosition(Vector3(-0.1, 0, 0.15));
+        
 		MeshInstance instance1(mesh_id4, xform1, white_mat_id);
 
 		MeshInstance instance2(mesh_id1, xform_head * xform2, head_mat_id);
@@ -117,7 +120,7 @@ namespace GLSLPT
 		MeshInstance instance11(mesh_id1, xform_head * xform5, head_mat_id);
 		MeshInstance instance12(mesh_id2, xform_body * xform5, body_mat_id);
 		MeshInstance instance13(mesh_id3, xform_base * xform5, base_mat_id);
-
+        
 		scene->AddMeshInstance(instance1);
 		scene->AddMeshInstance(instance2);
 		scene->AddMeshInstance(instance3);

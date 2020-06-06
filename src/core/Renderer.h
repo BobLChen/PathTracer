@@ -1,7 +1,8 @@
 #pragma once
 
-#include <glm/glm.hpp>
 #include <vector>
+
+#include "math/Vector2.h"
 
 #include "Quad.h"
 #include "Program.h"
@@ -20,11 +21,11 @@ namespace GLSLPT
             numTilesX = 8;
             numTilesY = 8;
             useEnvMap = false;
-            resolution = glm::vec2(1280, 720);
+            resolution = Vector2(1280, 720);
             hdrMultiplier = 1.0f;
         }
 
-        glm::ivec2 resolution;
+        Vector2 resolution;
         int maxDepth;
         int numTilesX;
         int numTilesY;
@@ -41,7 +42,7 @@ namespace GLSLPT
 
         virtual ~Renderer();
 
-        const glm::ivec2 getScreenSize() const 
+        const Vector2 getScreenSize() const 
 		{ 
 			return screenSize; 
 		}
@@ -75,7 +76,7 @@ namespace GLSLPT
 		Scene* scene;
 		Quad *quad;
 		int numOfLights;
-		glm::ivec2 screenSize;
+		Vector2 screenSize;
 		std::string shadersDirectory;
     };
 }

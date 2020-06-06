@@ -1,15 +1,13 @@
-﻿#pragma once
+#pragma once
 
 #include "math/Math.h"
-
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "math/Vector3.h"
 
 class Bounds3D
 {
 public:
-	glm::vec3 min;
-	glm::vec3 max;
+	Vector3 min;
+	Vector3 max;
 
 public:
 	Bounds3D()
@@ -19,44 +17,44 @@ public:
 
 	}
 
-	Bounds3D(const glm::vec3& p)
+	Bounds3D(const Vector3& p)
 		: min(p)
 		, max(p)
 	{
 
 	}
 
-	Bounds3D(const glm::vec3& p1, const glm::vec3& p2)
-		: min(glm::min(p1, p2))
-		, max(glm::max(p1, p2))
+	Bounds3D(const Vector3& inMin, const Vector3& inMax)
+        : min(Vector3::Min(inMin, inMax))
+        , max(Vector3::Max(inMin, inMax))
 	{
-
+        
 	}
 
-	glm::vec3 Center() const
+	Vector3 Center() const
 	{
 		return (min + max) * 0.5f;
 	}
 
-	glm::vec3 Extents() const
+	Vector3 Extents() const
 	{
 		return max - min;
 	}
 
-	bool Contains(const glm::vec3& p) const
+	bool Contains(const Vector3& p) const
 	{
-		glm::vec3 radius = 0.5f * Extents();
-		glm::vec3 center = Center();
-
+		Vector3 radius = 0.5f * Extents();
+		Vector3 center = Center();
+        
 		return 
-			std::abs(center.x - p.x) <= radius.x &&
-			std::abs(center.y - p.y) <= radius.y &&
-			std::abs(center.z - p.z) <= radius.z;
+			MMath::Abs(center.x - p.x) <= radius.x &&
+			MMath::Abs(center.y - p.y) <= radius.y &&
+			MMath::Abs(center.z - p.z) <= radius.z;
 	}
 
 	int Maxdim() const
 	{
-		glm::vec3 ext = Extents();
+		Vector3 ext = Extents();
 
 		if (ext.x >= ext.y && ext.x >= ext.z) {
 			return 0;
@@ -75,11 +73,11 @@ public:
 
 	float Area() const
 	{
-		glm::vec3 ext = Extents();
+		Vector3 ext = Extents();
 		return 2.f * (ext.x * ext.y + ext.x * ext.z + ext.y * ext.z);
 	}
 
-	const glm::vec3& operator [] (int i) const 
+	const Vector3& operator [] (int i) const
 	{ 
 		if (i == 0) {
 			return min;
@@ -90,32 +88,32 @@ public:
 		}
 	}
 
-	void Expand(const glm::vec3& p)
+	void Expand(const Vector3& p)
 	{
-		min = glm::min(min, p);
-		max = glm::max(max, p);
+        min = Vector3::Min(min, p);
+        max = Vector3::Max(max, p);
 	}
 
 	void Expand(const Bounds3D& b)
 	{
-		min = glm::min(min, b.min);
-		max = glm::max(max, b.max);
+        min = Vector3::Min(min, b.min);
+        max = Vector3::Max(max, b.max);
 	}
 
 	static Bounds3D Union(const Bounds3D& box1, const Bounds3D& box2)
 	{
-		return Bounds3D(glm::min(box1.min, box2.min), glm::max(box1.max, box2.max));
+        return Bounds3D(Vector3::Min(box1.min, box2.min), Vector3::Max(box1.max, box2.max));
 	}
 
 	static Bounds3D Intersection(const Bounds3D& box1, const Bounds3D& box2)
 	{
-		return Bounds3D(glm::max(box1.min, box2.min), glm::min(box1.max, box2.max));
+        return Bounds3D(Vector3::Max(box1.min, box2.min), Vector3::Min(box1.max, box2.max));
 	}
 
 	static void Intersection(const Bounds3D& box1, const Bounds3D& box2, Bounds3D& box)
 	{
-		box.min = glm::max(box1.min, box2.min);
-		box.max = glm::min(box1.max, box2.max);
+        box.min = Vector3::Max(box1.min, box2.min);
+        box.max = Vector3::Min(box1.max, box2.max);
 	}
 
 	static bool Contains(const Bounds3D& box1, const Bounds3D& box2)

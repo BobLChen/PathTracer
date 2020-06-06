@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <thread>
 
 #include "Scene.h"
 #include "Camera.h"
@@ -7,8 +8,8 @@
 namespace GLSLPT
 {
 	Scene::Scene() 
-		: camera(nullptr)
-		, hdrData(nullptr) 
+		: hdrData(nullptr)
+		, camera(nullptr) 
 	{
 		sceneBvh = new RadeonRays::Bvh(10.0f, 64, false);
 
@@ -43,7 +44,7 @@ namespace GLSLPT
 		}
 	}
 
-    void Scene::AddCamera(glm::vec3 pos, glm::vec3 lookAt, float fov)
+    void Scene::AddCamera(Vector3 pos, Vector3 lookAt, float fov)
     {
 		if (camera) 
 		{
@@ -180,8 +181,8 @@ namespace GLSLPT
 
 			}
 
-			bool done;
 			Mesh* mesh;
+            bool done;
 		};
 
 		class TextureLoadJob : public ThreadTask
@@ -211,21 +212,23 @@ namespace GLSLPT
 
 		printf("Loading assets ...\n");
 
-		std::vector<MeshLoadJob*> meshJobs(meshes.size());
+		std::vector<MeshLoadJob*> meshJobs;
 		for (int i = 0; i < meshes.size(); ++i) {
 			if (!meshes[i]->loaded) 
 			{
-				meshJobs[i] = new MeshLoadJob(meshes[i]);
-				taskPool->AddTask(meshJobs[i]);
+				MeshLoadJob* job = new MeshLoadJob(meshes[i]);
+				meshJobs.push_back(job);
+				taskPool->AddTask(job);
 			}
 		}
 
-		std::vector<TextureLoadJob*> textureJobs(textures.size());
+		std::vector<TextureLoadJob*> textureJobs;
 		for (int i = 0; i < textures.size(); ++i) {
 			if (!textures[i]->loaded)
 			{
-				textureJobs[i] = new TextureLoadJob(textures[i]);
-				taskPool->AddTask(textureJobs[i]);
+				TextureLoadJob* job = new TextureLoadJob(textures[i]);
+				textureJobs.push_back(job);
+				taskPool->AddTask(job);
 			}
 		}
 
@@ -264,27 +267,27 @@ namespace GLSLPT
 		for (int i = 0; i < meshInstances.size(); i++)
 		{
 			Bounds3D bbox = meshes[meshInstances[i].meshID]->bvh->Bounds();
-			glm::mat4 matrix = meshInstances[i].transform;
+			Matrix4x4 matrix = meshInstances[i].transform;
 
-			glm::vec3 minBound = bbox.min;
-			glm::vec3 maxBound = bbox.max;
+			Vector3 minBound = bbox.min;
+			Vector3 maxBound = bbox.max;
 
-			glm::vec3 right       = glm::vec3(matrix[0][0], matrix[0][1], matrix[0][2]);
-			glm::vec3 up          = glm::vec3(matrix[1][0], matrix[1][1], matrix[1][2]);
-			glm::vec3 forward     = glm::vec3(matrix[2][0], matrix[2][1], matrix[2][2]);
-			glm::vec3 translation = glm::vec3(matrix[3][0], matrix[3][1], matrix[3][2]);
+			Vector3 right       = Vector3(matrix.m[0][0], matrix.m[0][1], matrix.m[0][2]);
+			Vector3 up          = Vector3(matrix.m[1][0], matrix.m[1][1], matrix.m[1][2]);
+			Vector3 forward     = Vector3(matrix.m[2][0], matrix.m[2][1], matrix.m[2][2]);
+			Vector3 translation = Vector3(matrix.m[3][0], matrix.m[3][1], matrix.m[3][2]);
 
-			glm::vec3 xa = right * minBound.x;
-			glm::vec3 xb = right * maxBound.x;
+			Vector3 xa = right * minBound.x;
+			Vector3 xb = right * maxBound.x;
 
-			glm::vec3 ya = up * minBound.y;
-			glm::vec3 yb = up * maxBound.y;
+			Vector3 ya = up * minBound.y;
+			Vector3 yb = up * maxBound.y;
 
-			glm::vec3 za = forward * minBound.z;
-			glm::vec3 zb = forward * maxBound.z;
+			Vector3 za = forward * minBound.z;
+			Vector3 zb = forward * maxBound.z;
 
-			minBound = glm::min(xa, xb) + glm::min(ya, yb) + glm::min(za, zb) + translation;
-			maxBound = glm::max(xa, xb) + glm::max(ya, yb) + glm::max(za, zb) + translation;
+            minBound = Vector3::Min(xa, xb) + Vector3::Min(ya, yb) + Vector3::Min(za, zb) + translation;
+            maxBound = Vector3::Max(xa, xb) + Vector3::Max(ya, yb) + Vector3::Max(za, zb) + translation;
 
 			Bounds3D bound;
 			bound.min = minBound;

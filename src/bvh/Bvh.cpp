@@ -25,6 +25,7 @@ THE SOFTWARE.
 #include <numeric>
 
 #include "Bvh.h"
+#include "math/Vector3.h"
 
 namespace RadeonRays
 {
@@ -57,7 +58,7 @@ namespace RadeonRays
         return &m_Nodes[m_Nodecnt++];
     }
 
-    void Bvh::BuildNode(const SplitRequest& req, const Bounds3D* bounds, const glm::vec3* centroids, int* primindices)
+    void Bvh::BuildNode(const SplitRequest& req, const Bounds3D* bounds, const Vector3* centroids, int* primindices)
     {
         m_Height = std::max(m_Height, req.level);
 
@@ -235,7 +236,7 @@ namespace RadeonRays
 		}
     }
 
-    Bvh::SahSplit Bvh::FindSahSplit(const SplitRequest& req, const Bounds3D* bounds, const glm::vec3* centroids, int* primindices) const
+    Bvh::SahSplit Bvh::FindSahSplit(const SplitRequest& req, const Bounds3D* bounds, const Vector3* centroids, int* primindices) const
     {
         // SAH implementation
         // calc centroids histogram
@@ -253,8 +254,8 @@ namespace RadeonRays
         // put NAN sentinel as split border
         // PerformObjectSplit simply splits in half
         // in this case
-        glm::vec3 centroidExtents = req.centroidBounds.Extents();
-        if (glm::dot(centroidExtents, centroidExtents) == 0.f)
+        Vector3 centroidExtents = req.centroidBounds.Extents();
+        if (Vector3::DotProduct(centroidExtents, centroidExtents) == 0.f)
         {
             return split;
         }
@@ -275,7 +276,7 @@ namespace RadeonRays
         // Precompute inverse parent area
         float invarea = 1.f / req.bounds.Area();
         // Precompute min point
-        glm::vec3 rootmin = req.centroidBounds.min;
+        Vector3 rootmin = req.centroidBounds.min;
 
         // Evaluate all dimensions
         for (int axis = 0; axis < 3; ++axis)
@@ -358,7 +359,7 @@ namespace RadeonRays
         InitNodeAllocator(2 * numbounds - 1);
 
         // Cache some stuff to have faster partitioning
-        std::vector<glm::vec3> centroids(numbounds);
+        std::vector<Vector3> centroids(numbounds);
         m_Indices.resize(numbounds);
         std::iota(m_Indices.begin(), m_Indices.end(), 0);
 
@@ -366,7 +367,7 @@ namespace RadeonRays
 		Bounds3D centroidBounds;
         for (size_t i = 0; i < static_cast<size_t>(numbounds); ++i)
         {
-            glm::vec3 c = bounds[i].Center();
+            Vector3 c = bounds[i].Center();
             centroidBounds.Expand(c);
             centroids[i] = c;
         }

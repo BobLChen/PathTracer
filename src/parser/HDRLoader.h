@@ -2,8 +2,9 @@
 
 #include <iostream>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "math/Vector2.h"
+#include "math/Vector3.h"
+#include "math/Vector4.h"
 
 /***********************************************************************************
 	Created:	17:9:2002
@@ -54,8 +55,8 @@ public:
 	int width, height;
 	// each pixel takes 3 float32, each component can be of any value...
 	float* cols;
-	glm::vec2* marginalDistData;    // y component holds the pdf
-	glm::vec2* conditionalDistData; // y component holds the pdf
+	Vector2* marginalDistData;    // y component holds the pdf
+	Vector2* conditionalDistData; // y component holds the pdf
 };
 
 class HDRLoader 

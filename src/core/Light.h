@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include "math/Vector3.h"
 
 namespace GLSLPT
 {
@@ -12,10 +12,10 @@ namespace GLSLPT
 
 	struct Light
 	{
-		glm::vec3 position;
-		glm::vec3 emission;
-		glm::vec3 u;
-		glm::vec3 v;
+		Vector3 position;
+		Vector3 emission;
+		Vector3 u;
+		Vector3 v;
 
 		float radius;
 		float area;

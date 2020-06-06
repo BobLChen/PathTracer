@@ -15,8 +15,8 @@
 #include "core/TiledRenderer.h"
 
 #include "parser/SceneLoader.h"
+#include "parser/GLBLoader.h"
 
-#include "test/AjaxTestScene.h"
 #include "test/BoyTestScene.h"
 #include "test/CornellTestScene.h"
 
@@ -42,15 +42,17 @@ void LoadSampleScene(int index)
 	}
 	scene = new Scene();
 
-	switch (index)
-	{
-		case 0:	
-			LoadSceneFromFile(path + "assets/hyperion.scene", scene, renderOptions);
-			break;
-		case 1:	
-			LoadSceneFromFile(path + "assets/cornell_box.scene", scene, renderOptions);
-			break;
-	}
+     switch (index)
+     {
+         case 0:
+             LoadSceneFromFile(path + "assets/hyperion.scene", scene, renderOptions);
+             break;
+         case 1:
+             LoadSceneFromFile(path + "assets/cornell_box.scene", scene, renderOptions);
+             break;
+     }
+
+	// LoadSceneFromGLTF(path + "assets/diorama.glb", scene, renderOptions);
 
 	selectedInstance = 0;
     scene->renderOptions = renderOptions;
@@ -199,7 +201,7 @@ void OnGUI(float deltaTime)
 
 	if (ImGui::CollapsingHeader("Camera"))
 	{
-		float fov = glm::degrees(scene->camera->fov);
+        float fov = MMath::RadiansToDegrees(scene->camera->fov);
 		float aperture = scene->camera->aperture * 1000.0f;
 
 		optionsChanged |= ImGui::SliderFloat("Fov", &fov, 10, 90);
@@ -241,8 +243,8 @@ void OnGUI(float deltaTime)
 		ImGui::Separator();
 		ImGui::Text("Materials");
 
-		glm::vec3* albedo   = &scene->materials[scene->meshInstances[selectedInstance].materialID].albedo;
-		glm::vec3* emission = &scene->materials[scene->meshInstances[selectedInstance].materialID].emission;
+		Vector3* albedo   = &scene->materials[scene->meshInstances[selectedInstance].materialID].albedo;
+		Vector3* emission = &scene->materials[scene->meshInstances[selectedInstance].materialID].emission;
 
 		objectPropChanged |= ImGui::ColorEdit3("Albedo", (float*)albedo, 0);
 		objectPropChanged |= ImGui::ColorEdit3("Emission", (float*)emission, 0);
@@ -257,9 +259,9 @@ void OnGUI(float deltaTime)
 			auto io = ImGui::GetIO();
 			
 			scene->camera->ComputeViewProjectionMatrix(viewMatrix, projectionMatrix, io.DisplaySize.x / io.DisplaySize.y);
-			glm::mat4x4 tmpMat = scene->meshInstances[selectedInstance].transform;
+			Matrix4x4 tmpMat = scene->meshInstances[selectedInstance].transform;
 
-			EditTransform(viewMatrix, projectionMatrix, (float*)&tmpMat);
+			EditTransform(viewMatrix, projectionMatrix, (float*)&tmpMat.m);
 
 			if (memcmp(&tmpMat, &scene->meshInstances[selectedInstance].transform, sizeof(float) * 16))
 			{

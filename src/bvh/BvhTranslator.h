@@ -64,8 +64,8 @@ namespace RadeonRays
 		int ProcessTLASNodes(const Bvh::Node* root);
 
 	public:
-		std::vector<glm::vec3> bboxmin;
-		std::vector<glm::vec3> bboxmax;
+		std::vector<Vector3> bboxmin;
+		std::vector<Vector3> bboxmax;
 		std::vector<Node> nodes;
 		int nodeTexWidth;
 		int topLevelIndexPackedXY = 0;

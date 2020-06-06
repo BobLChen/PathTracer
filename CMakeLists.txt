@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10.0)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
-project(GLSL-Pathtracer)
+project(Pathtracer)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -40,7 +40,6 @@ endif()
 
 include_directories(
 	src/
-	external/glm/
 	external/glfw/include/
 	external/glad/include/
 	external/imgui/

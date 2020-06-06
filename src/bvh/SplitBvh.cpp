@@ -12,7 +12,7 @@ namespace RadeonRays
         PrimRefArray primrefs(numbounds);
 
         // Keep centroids to speed up partitioning
-        std::vector<glm::vec3> centroids(numbounds);
+        std::vector<Vector3> centroids(numbounds);
 		Bounds3D centroidBounds;
 
         for (auto i = 0; i < numbounds; ++i)
@@ -214,8 +214,8 @@ namespace RadeonRays
         // put NAN sentinel as split border
         // PerformObjectSplit simply splits in half
         // in this case
-        glm::vec3 centroidExtents = req.centroidBounds.Extents();
-        if (glm::dot(centroidExtents, centroidExtents) == 0.f)
+        Vector3 centroidExtents = req.centroidBounds.Extents();
+        if (Vector3::DotProduct(centroidExtents, centroidExtents) == 0.f)
         {
             return split;
         }
@@ -331,11 +331,12 @@ namespace RadeonRays
         split.sah   = sah;
 
         // Extents
-        glm::vec3 extents = req.bounds.Extents();
+        Vector3 extents = req.bounds.Extents();
         auto invarea = 1.f / req.bounds.Area();
 
         // If there are too few primitives don't split them
-        if (glm::dot(extents,extents) == 0.f)
+        
+        if (Vector3::DotProduct(extents, extents) == 0.f)
         {
             return split;
         }
@@ -351,9 +352,9 @@ namespace RadeonRays
         Bin bins[3][kNumBins];
 
         // Prepcompute some useful stuff
-        glm::vec3 origin     = req.bounds.min;
-        glm::vec3 binsize    = req.bounds.Extents() * (1.f / kNumBins);
-        glm::vec3 invbinsize = glm::vec3(1.f / binsize.x, 1.f / binsize.y, 1.f / binsize.z);
+        Vector3 origin     = req.bounds.min;
+        Vector3 binsize    = req.bounds.Extents() * (1.f / kNumBins);
+        Vector3 invbinsize = Vector3(1.f / binsize.x, 1.f / binsize.y, 1.f / binsize.z);
 
         // Initialize bins
         for (int axis = 0; axis < 3; ++axis)
@@ -371,9 +372,9 @@ namespace RadeonRays
         {
             PrimRef const& primref(refs[i]);
             // Determine starting bin for this primitive
-            glm::vec3 firstbin = glm::clamp((primref.bounds.min - origin) * invbinsize, glm::vec3(0, 0, 0), glm::vec3(kNumBins - 1, kNumBins - 1, kNumBins - 1));
+            Vector3 firstbin = Vector3::Clamp((primref.bounds.min - origin) * invbinsize, Vector3(0, 0, 0), Vector3(kNumBins - 1, kNumBins - 1, kNumBins - 1));
             // Determine finishing bin
-            glm::vec3 lastbin  = glm::clamp((primref.bounds.max - origin) * invbinsize, firstbin, glm::vec3(kNumBins - 1, kNumBins - 1, kNumBins - 1));
+            Vector3 lastbin  = Vector3::Clamp((primref.bounds.max - origin) * invbinsize, firstbin, Vector3(kNumBins - 1, kNumBins - 1, kNumBins - 1));
             // Iterate over axis
             for (int axis = 0; axis < 3; ++axis)
             {

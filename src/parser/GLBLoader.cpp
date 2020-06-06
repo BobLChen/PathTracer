@@ -1,5 +1,11 @@
 ﻿#include <map>
 
+#include "math/Matrix4x4.h"
+#include "math/Quat.h"
+#include "math/Vector2.h"
+#include "math/Vector3.h"
+#include "math/Vector4.h"
+
 #include "GLBLoader.h"
 
 #define TINYGLTF_IMPLEMENTATION
@@ -14,14 +20,80 @@ namespace GLSLPT
 	struct GLTFNode
 	{
 		GLTFNode* parent = nullptr;
+
 		int meshID = -1;
 		int materialID = -1;
-		glm::mat4x4 transform;
+
+		std::string name;
+
+		Matrix4x4 matrix;
+
+		Matrix4x4 WorldMatrix()
+		{
+			Matrix4x4 transform = matrix;
+			if (parent) {
+				transform.Append(parent->WorldMatrix());
+			}
+			return transform;
+		}
 	};
 
-	void LoadGLTFNode(GLTFNode& parent, tinygltf::Node& gltfNode, tinygltf::Model &gltfModel)
+	void LoadGLTFNode(GLTFNode* parent, tinygltf::Node& gltfNode, tinygltf::Model &gltfModel, std::vector<GLTFNode*>& nodes)
 	{
+		GLTFNode* node = new GLTFNode();
+		node->name = gltfNode.name;
+		node->parent = parent;
 
+		nodes.push_back(node);
+
+		if (gltfNode.matrix.size() == 16)
+		{
+			node->matrix.m[0][0] = gltfNode.matrix[0];
+			node->matrix.m[0][1] = gltfNode.matrix[1];
+			node->matrix.m[0][2] = gltfNode.matrix[2];
+			node->matrix.m[0][3] = gltfNode.matrix[3];
+
+			node->matrix.m[1][0] = gltfNode.matrix[4];
+			node->matrix.m[1][1] = gltfNode.matrix[5];
+			node->matrix.m[1][2] = gltfNode.matrix[6];
+			node->matrix.m[1][3] = gltfNode.matrix[7];
+
+			node->matrix.m[2][0] = gltfNode.matrix[8];
+			node->matrix.m[2][1] = gltfNode.matrix[9];
+			node->matrix.m[2][2] = gltfNode.matrix[10];
+			node->matrix.m[2][3] = gltfNode.matrix[11];
+
+			node->matrix.m[3][0] = gltfNode.matrix[12];
+			node->matrix.m[3][1] = gltfNode.matrix[13];
+			node->matrix.m[3][2] = gltfNode.matrix[14];
+			node->matrix.m[3][3] = gltfNode.matrix[15];
+		}
+		else
+		{
+			if (gltfNode.rotation.size() == 4) 
+			{
+				Quat quat(gltfNode.rotation[0], gltfNode.rotation[1], gltfNode.rotation[2], gltfNode.rotation[3]);
+				node->matrix.Append(quat.ToMatrix());
+			}
+			if (gltfNode.scale.size() == 3) 
+			{
+				node->matrix.AppendScale(Vector3(gltfNode.scale[0], gltfNode.scale[1], gltfNode.scale[2]));
+			}
+			if (gltfNode.translation.size() == 3) 
+			{
+				node->matrix.AppendTranslation(Vector3(gltfNode.translation[0], gltfNode.translation[1], gltfNode.translation[2]));
+			}
+		}
+		
+		if (gltfNode.mesh > -1) 
+		{
+			node->meshID = gltfNode.mesh;
+		}
+
+		for (int i = 0; i < gltfNode.children.size(); ++i) 
+		{
+			LoadGLTFNode(node, gltfModel.nodes[gltfNode.children[i]], gltfModel, nodes);
+		}
 	}
 
 	bool LoadSceneFromGLTF(const std::string& filename, Scene* scene, RenderOptions& renderOptions)
@@ -34,65 +106,109 @@ namespace GLSLPT
 		gltfContext.LoadBinaryFromFile(&gltfModel, &error, &warning, filename);
 
 		// load textures
-		std::map<std::string, int> texturesMap;
+		std::vector<int> textures;
 		for (int32 i = 0; i < gltfModel.textures.size(); ++i)
 		{
 			tinygltf::Texture& tex = gltfModel.textures[i];
 			tinygltf::Image& image = gltfModel.images[tex.source];
-			int id = scene->AddTexture(tex.name, image.image.data, image.width, image.height, image.component);
-			texturesMap.insert(std::make_pair(tex.name, id));
+			int textureID = scene->AddTexture(tex.name, image.image.data(), image.width, image.height, image.component);
+			textures.push_back(textureID);
 		}
 
 		// load materials
-		std::map<std::string, int> materialsMap;
+		std::vector<int> materials;
 		for (int32 i = 0; i < gltfModel.materials.size(); ++i)
 		{
 			tinygltf::Material& gltfMat = gltfModel.materials[i];
 			Material material;
 
-			if (gltfMat.values.find("baseColorFactor") != gltfMat.values.end()) {
+			if (gltfMat.values.find("baseColorFactor") != gltfMat.values.end()) 
+			{
 				material.albedo.x = gltfMat.values["baseColorFactor"].ColorFactor().data()[0];
 				material.albedo.y = gltfMat.values["baseColorFactor"].ColorFactor().data()[1];
 				material.albedo.z = gltfMat.values["baseColorFactor"].ColorFactor().data()[2];
-				// material.albedo.w = gltfMat.values["baseColorFactor"].ColorFactor().data()[3];
 			}
 
-			if (gltfMat.values.find("baseColorTexture") != gltfMat.values.end()) {
-				material.albedoTexID = gltfMat.values["baseColorTexture"].TextureIndex();
+			if (gltfMat.values.find("baseColorTexture") != gltfMat.values.end()) 
+			{
+				material.albedoTexID = textures[gltfMat.values["baseColorTexture"].TextureIndex()];
+				// gltfMat.values["baseColorTexture"].TextureTexCoord();
 			}
 
-			if (gltfMat.values.find("roughnessFactor") != gltfMat.values.end()) {
+			if (gltfMat.values.find("metallicRoughnessTexture") != gltfMat.values.end()) 
+			{
+				material.metallicRoughnessTexID = textures[gltfMat.values["metallicRoughnessTexture"].TextureIndex()];
+				// gltfMat.values["metallicRoughnessTexture"].TextureTexCoord();
+			}
+
+			if (gltfMat.values.find("roughnessFactor") != gltfMat.values.end()) 
+			{
 				material.roughness = gltfMat.values["roughnessFactor"].Factor();
 			}
 
-			if (gltfMat.values.find("metallicFactor") != gltfMat.values.end()) {
+			if (gltfMat.values.find("metallicFactor") != gltfMat.values.end()) 
+			{
 				material.metallic = gltfMat.values["metallicFactor"].Factor();
 			}
-			
-			int id = scene->AddMaterial(material);
-			materialsMap.insert(std::make_pair(gltfMat.name, id));
+
+			if (gltfMat.additionalValues.find("normalTexture") != gltfMat.additionalValues.end()) 
+			{
+				material.normalmapTexID = textures[gltfMat.additionalValues["normalTexture"].TextureIndex()];
+				// gltfMat.additionalValues["normalTexture"].TextureTexCoord();
+			}
+
+			if (gltfMat.additionalValues.find("emissiveTexture") != gltfMat.additionalValues.end()) 
+			{
+				// material.emission = gltfMat.additionalValues["emissiveTexture"].TextureIndex();
+				// gltfMat.additionalValues["emissiveTexture"].TextureTexCoord();
+			}
+
+			if (gltfMat.additionalValues.find("emissiveFactor") != gltfMat.additionalValues.end()) 
+			{
+				material.emission.x = gltfMat.additionalValues["emissiveFactor"].ColorFactor().data()[0];
+				material.emission.y = gltfMat.additionalValues["emissiveFactor"].ColorFactor().data()[1];
+				material.emission.z = gltfMat.additionalValues["emissiveFactor"].ColorFactor().data()[2];
+			}
+
+			if (gltfMat.additionalValues.find("occlusionTexture") != gltfMat.additionalValues.end()) 
+			{
+				// material.occlusionTexture = gltfMat.additionalValues["occlusionTexture"].TextureIndex();
+				// gltfMat.additionalValues["occlusionTexture"].TextureTexCoord();
+			}
+
+			int materialID = scene->AddMaterial(material);
+			materials.push_back(materialID);
 		}
 
 		// load meshes
-		std::map<std::string, int> meshesMap;
+		struct GLTFMesh
+		{
+			int mesh;
+			int meshID;
+			int materialID;
+
+			GLTFMesh(int id, int inMesh, int inMaterial)
+				: mesh(id)
+				, meshID(inMesh)
+				, materialID(inMaterial)
+			{
+
+			}
+		};
+
+		std::vector<GLTFMesh> meshes;
 		for (int32 i = 0; i < gltfModel.meshes.size(); ++i)
 		{
 			tinygltf::Mesh& gltfMesh = gltfModel.meshes[i];
-			Mesh* mesh = new Mesh();
-			mesh->name = gltfMesh.name;
-			mesh->loaded = true;
 
-			std::vector<glm::vec4> verticesUVX;
-			std::vector<glm::vec4> normalsUVY;
-			std::vector<int> indices;
-
-			// merge primitives into one mesh
-			int32 startIndex = 0;
 			for (int32 j = 0; j < gltfMesh.primitives.size(); ++j)
 			{
 				tinygltf::Primitive& primitive = gltfMesh.primitives[j];
 
-				// vertices
+				std::vector<Vector4> verticesUVX;
+				std::vector<Vector4> normalsUVY;
+				std::vector<int> indices;
+
 				uint8* bufferPos = nullptr;
 				uint8* bufferNormals = nullptr;
 				uint8* bufferUV0 = nullptr;
@@ -111,8 +227,8 @@ namespace GLSLPT
 
 				for (int32 v = 0; v < posAccessor.count; ++v)
 				{
-					glm::vec4 pos;
-					glm::vec4 nrm;
+					Vector4 pos;
+					Vector4 nrm;
 
 					// pos
 					{
@@ -134,11 +250,11 @@ namespace GLSLPT
 						nrm.y = buf[v * 3 + 1];
 						nrm.z = buf[v * 3 + 2];
 					}
-					
+
 					verticesUVX.push_back(pos);
 					normalsUVY.push_back(nrm);
 				}
-				
+
 				// indices
 				tinygltf::Accessor& indicesAccessor = gltfModel.accessors[primitive.indices];
 				tinygltf::BufferView& indicesBufferView = gltfModel.bufferViews[indicesAccessor.bufferView];
@@ -149,43 +265,85 @@ namespace GLSLPT
 					if (indicesAccessor.componentType == TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT)
 					{
 						const uint32* buf = (const uint32*)(bufferIndices);
-						indices.push_back(buf[v] + startIndex);
+						indices.push_back(buf[v]);
 					}
 					else if (indicesAccessor.componentType == TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT)
 					{
 						const uint16* buf = (const uint16*)(bufferIndices);
-						indices.push_back(buf[v] + startIndex);
+						indices.push_back(buf[v]);
 					}
 					else if (indicesAccessor.componentType == TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT)
 					{
 						const uint8* buf = (const uint8*)(bufferIndices);
-						indices.push_back(buf[v] + startIndex);
+						indices.push_back(buf[v]);
 					}
 				}
-				startIndex += indicesAccessor.count;
 
-				// sort vertices
-				for (int i = 0; i < indices.size(); ++i)
+				Mesh* mesh = new Mesh();
+				mesh->loaded = true;
+
+				// vertices
+				for (int v = 0; v < indices.size(); ++v)
 				{
-					glm::vec4 posu = verticesUVX[indices[i]];
-					glm::vec4 nrmv = normalsUVY[indices[i]];
+					Vector4 posu = verticesUVX[indices[v]];
+					Vector4 nrmv = normalsUVY[indices[v]];
 					mesh->verticesUVX.push_back(posu);
 					mesh->normalsUVY.push_back(nrmv);
 				}
-				
-				int id = scene->AddMesh(mesh);
-				meshesMap.insert(std::make_pair(gltfMesh.name, id));
+
+				int meshID = scene->AddMesh(mesh);
+				int materialID = materials[primitive.material];
+				meshes.push_back(GLTFMesh(i, meshID, materialID));
 			}
 		}
 
 		// load nodes
 		tinygltf::Scene& gltfScene = gltfModel.scenes[0];
-		GLTFNode rootNode;
+		GLTFNode* rootNode = new GLTFNode();
+		std::vector<GLTFNode*> nodeList;
 		for (int i = 0; i < gltfScene.nodes.size(); ++i)
 		{
 			tinygltf::Node& gltfNode = gltfModel.nodes[gltfScene.nodes[i]];
-			LoadGLTFNode(rootNode, gltfNode, gltfModel);
+			LoadGLTFNode(rootNode, gltfNode, gltfModel, nodeList);
 		}
-		
+
+		// instances
+		for (int i = 0; i < nodeList.size(); ++i)
+		{
+			if (nodeList[i]->meshID == -1) {
+				continue;
+			}
+
+			for (int j = 0; j < meshes.size(); ++j) 
+			{
+				if (meshes[j].mesh == nodeList[i]->meshID) 
+				{
+					int meshID = meshes[j].meshID;
+					int materialID = meshes[j].materialID;
+					Matrix4x4 transform = nodeList[j]->WorldMatrix();
+					MeshInstance instance1(meshID, transform, materialID);
+					scene->AddMeshInstance(instance1);
+					break;
+				}
+			}
+		}
+
+		for (int i = 0; i < nodeList.size(); ++i) {
+			delete nodeList[i];
+		}
+
+		renderOptions.maxDepth  = 4;
+		renderOptions.numTilesY = 4;
+		renderOptions.numTilesX = 4;
+		renderOptions.hdrMultiplier = 1.0f;
+		renderOptions.useEnvMap = true;
+
+		scene->AddCamera(Vector3(0.0f, 10.0f, -10.0f), Vector3(0.0f, 0.0f, 0.0f), 60.0f);
+
+		scene->AddHDR(std::string(EMBED_RES_PATH) + "assets/HDR/photo_studio_01_1k.hdr");
+
+		scene->CreateAccelerationStructures();
+
+		return true;
 	}
 }

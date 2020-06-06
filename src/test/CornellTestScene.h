@@ -1,8 +1,9 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/transform.hpp>
+#include "math/Matrix4x4.h"
+#include "math/Vector2.h"
+#include "math/Vector3.h"
+#include "math/Vector4.h"
 
 #include "core/Scene.h"
 
@@ -15,7 +16,7 @@ namespace GLSLPT
 		renderOptions.numTilesX = 5;
 		renderOptions.hdrMultiplier = 1.0f;
 		renderOptions.useEnvMap = true;
-		scene->AddCamera(glm::vec3(0.276f, 0.275f, -0.75f), glm::vec3(0.276f, 0.275f, 0), 65.0f);
+		scene->AddCamera(Vector3(0.276f, 0.275f, -0.75f), Vector3(0.276f, 0.275f, 0), 65.0f);
 
 		int ceiling_mesh_id   = scene->AddMesh(rootPath + "assets/cornell_box/cbox_ceiling.obj");
 		int floor_mesh_id     = scene->AddMesh(rootPath + "assets/cornell_box/cbox_floor.obj");
@@ -26,13 +27,13 @@ namespace GLSLPT
 		int smallbox_mesh_id  = scene->AddMesh(rootPath + "assets/cornell_box/cbox_smallbox.obj");
 
 		Material white;
-		white.albedo = glm::vec3(0.725f, 0.71f, 0.68f);
+		white.albedo = Vector3(0.725f, 0.71f, 0.68f);
 
 		Material red;
-		red.albedo = glm::vec3(0.63f, 0.065f, 0.05f);
+		red.albedo = Vector3(0.63f, 0.065f, 0.05f);
 
 		Material green;
-		green.albedo = glm::vec3(0.14f, 0.45f, 0.091f);
+		green.albedo = Vector3(0.14f, 0.45f, 0.091f);
 
 		int white_mat_id = scene->AddMaterial(white);
 		int red_mat_id = scene->AddMaterial(red);
@@ -40,15 +41,16 @@ namespace GLSLPT
 
 		Light light;
 		light.type = LightType::QuadLight;
-		light.position = glm::vec3(.34299999f, .54779997f, .22700010f);
-		light.u = glm::vec3(.34299999f, .54779997f, .33200008f) - light.position;
-		light.v = glm::vec3(.21300001f, .54779997f, .22700010f) - light.position;
-		light.area = glm::length(glm::cross(light.u, light.v));
-		light.emission = glm::vec3(17, 12, 4);
+		light.position = Vector3(.34299999f, .54779997f, .22700010f);
+		light.u = Vector3(.34299999f, .54779997f, .33200008f) - light.position;
+		light.v = Vector3(.21300001f, .54779997f, .22700010f) - light.position;
+        light.area = Vector3::CrossProduct(light.u, light.v).Size();
+		light.emission = Vector3(17, 12, 4);
 
-		int light_id = scene->AddLight(light);
+		scene->AddLight(light);
 
-		glm::mat4 xform = glm::scale(glm::vec3(0.01f));
+        Matrix4x4 xform;
+        xform.SetScale(Vector3(0.01f, 0.01f, 0.01f), 1.0f);
 		
 		MeshInstance instance1(ceiling_mesh_id, xform, white_mat_id);
 		MeshInstance instance2(floor_mesh_id, xform, white_mat_id);

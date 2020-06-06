@@ -50,7 +50,7 @@ namespace RadeonRays
 		{
 			// Prim bounds
 			Bounds3D bounds;
-			glm::vec3 center;
+			Vector3 center;
 			int idx;
 		};
 

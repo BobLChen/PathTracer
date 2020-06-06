@@ -59,8 +59,8 @@ namespace GLSLPT
 						tx = ty = 0;
 					}
 
-					verticesUVX.push_back(glm::vec4(vx, vy, vz, tx));
-					normalsUVY.push_back(glm::vec4(nx, ny, nz, ty));
+					verticesUVX.push_back(Vector4(vx, vy, vz, tx));
+					normalsUVY.push_back(Vector4(nx, ny, nz, ty));
 				}
 	
 				indexOffset += fv;
@@ -77,9 +77,9 @@ namespace GLSLPT
 
 		for (int i = 0; i < numTris; ++i)
 		{
-			const glm::vec3 v1 = glm::vec3(verticesUVX[i * 3 + 0]);
-			const glm::vec3 v2 = glm::vec3(verticesUVX[i * 3 + 1]);
-			const glm::vec3 v3 = glm::vec3(verticesUVX[i * 3 + 2]);
+			const Vector3 v1 = Vector3(verticesUVX[i * 3 + 0]);
+			const Vector3 v2 = Vector3(verticesUVX[i * 3 + 1]);
+			const Vector3 v3 = Vector3(verticesUVX[i * 3 + 2]);
 
 			bounds[i].Expand(v1);
 			bounds[i].Expand(v2);

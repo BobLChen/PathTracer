@@ -1,6 +1,7 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include "math/Vector3.h"
+#include "math/Vector4.h"
 
 namespace GLSLPT
 {
@@ -15,10 +16,10 @@ namespace GLSLPT
 	public:
 		Material()
 		{
-			albedo = glm::vec3(1.0f, 1.0f, 1.0f);
+			albedo = Vector3(1.0f, 1.0f, 1.0f);
 			materialType = DISNEY;
 
-			emission = glm::vec3(0.0f, 0.0f, 0.0f);
+			emission = Vector3(0.0f, 0.0f, 0.0f);
 			unused = 0;
 
 			metallic = 0.0f;
@@ -32,10 +33,10 @@ namespace GLSLPT
 			heightmapTexID = -1.0f;
 		};
 
-		glm::vec3 albedo;
+		Vector3 albedo;
 		float materialType;
 
-		glm::vec3 emission;
+		Vector3 emission;
 		float unused;
 
 		float metallic;

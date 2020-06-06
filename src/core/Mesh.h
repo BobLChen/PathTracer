@@ -1,8 +1,10 @@
 #pragma once
 
 #include <vector>
-#include <glm/glm.hpp>
 
+#include "math/Vector3.h"
+#include "math/Vector4.h"
+#include "math/Matrix4x4.h"
 #include "bvh/SplitBvh.h"
 
 namespace GLSLPT
@@ -16,7 +18,7 @@ namespace GLSLPT
 			bvh = new RadeonRays::SplitBvh(2.0f, 64, 0, 0.001f, 2.5f); 
 		}
 
-		~Mesh() 
+		~Mesh()
 		{ 
 			if (bvh)
 			{
@@ -31,8 +33,8 @@ namespace GLSLPT
 
 	public:
 		// Mesh Data
-		std::vector<glm::vec4> verticesUVX;
-		std::vector<glm::vec4> normalsUVY;
+		std::vector<Vector4> verticesUVX;
+		std::vector<Vector4> normalsUVY;
 
 		RadeonRays::Bvh* bvh;
 		std::string name;
@@ -42,10 +44,10 @@ namespace GLSLPT
 	class MeshInstance
 	{
 	public:
-		MeshInstance(int meshId, glm::mat4 xform, int matId) 
-			: meshID(meshId)
-			, transform(xform) 
-			, materialID(matId) 
+		MeshInstance(int meshId, Matrix4x4 xform, int matId)
+            : transform(xform)
+            , materialID(matId)
+			, meshID(meshId)
 		{
 
 		}
@@ -55,7 +57,7 @@ namespace GLSLPT
 
 		}
 
-		glm::mat4 transform;
+		Matrix4x4 transform;
 		int materialID;
 		int meshID;
 	};

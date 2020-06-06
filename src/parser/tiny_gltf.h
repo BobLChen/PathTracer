@@ -1085,7 +1085,7 @@ class TinyGLTF {
 #endif
 
 #ifndef TINYGLTF_NO_STB_IMAGE
-#include "Loader/ImageLoader.h"
+#include "parser/stb_image.h"
 #endif
 
 #ifndef TINYGLTF_NO_STB_IMAGE_WRITE

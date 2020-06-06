@@ -43,11 +43,8 @@ namespace GLSLPT
 		int numTilesY;
 		int tileWidth;
 		int tileHeight;
-		int maxSamples;
-		int maxDepth;
 		int currentBuffer;
 
-		bool renderCompleted;
 		float sampleCounter;
 		float totalTime;
     };
