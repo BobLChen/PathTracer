@@ -104,23 +104,23 @@ namespace GLSLPT
 		Matrix4x4 xform5;
         xform5.SetPosition(Vector3(-0.1, 0, 0.15));
         
-		MeshInstance instance1(meshID4, xform1, whiteMatID);
+		MeshInstance instance1(meshID4, xform1, whiteMatID, "instance1");
 
-		MeshInstance instance2(meshID1, xformHead * xform2, headMatID);
-		MeshInstance instance3(meshID2, xformBody * xform2, bodyMatID);
-		MeshInstance instance4(meshID3, xformBase * xform2, baseMatID);
+		MeshInstance instance2(meshID1, xformHead * xform2, headMatID, "head0");
+		MeshInstance instance3(meshID2, xformBody * xform2, bodyMatID, "body0");
+		MeshInstance instance4(meshID3, xformBase * xform2, baseMatID, "base0");
 		
-		MeshInstance instance5(meshID1, xformHead * xform3, headMatID);
-		MeshInstance instance6(meshID2, xformBody * xform3, bodyMatID);
-		MeshInstance instance7(meshID3, xformBase * xform3, baseMatID);
+		MeshInstance instance5(meshID1, xformHead * xform3, headMatID, "head1");
+		MeshInstance instance6(meshID2, xformBody * xform3, bodyMatID, "body1");
+		MeshInstance instance7(meshID3, xformBase * xform3, baseMatID, "base1");
 
-		MeshInstance instance8(meshID1, xformHead * xform4, headMatID);
-		MeshInstance instance9(meshID2, xformBody * xform4, bodyMatID);
-		MeshInstance instance10(meshID3, xformBase * xform4, baseMatID);
+		MeshInstance instance8(meshID1, xformHead * xform4, headMatID, "head2");
+		MeshInstance instance9(meshID2, xformBody * xform4, bodyMatID, "body2");
+		MeshInstance instance10(meshID3, xformBase * xform4, baseMatID, "base2");
 
-		MeshInstance instance11(meshID1, xformHead * xform5, headMatID);
-		MeshInstance instance12(meshID2, xformBody * xform5, bodyMatID);
-		MeshInstance instance13(meshID3, xformBase * xform5, baseMatID);
+		MeshInstance instance11(meshID1, xformHead * xform5, headMatID, "head3");
+		MeshInstance instance12(meshID2, xformBody * xform5, bodyMatID, "body3");
+		MeshInstance instance13(meshID3, xformBase * xform5, baseMatID, "base3");
         
 		scene->AddMeshInstance(instance1);
 		scene->AddMeshInstance(instance2);

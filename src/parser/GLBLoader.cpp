@@ -327,7 +327,7 @@ namespace GLSLPT
 				GLTFMesh& mesh = meshes[j];
 				if (mesh.mesh == node->meshID)
 				{
-					scene->AddMeshInstance(MeshInstance(mesh.meshID, node->WorldMatrix(), mesh.materialID));
+					scene->AddMeshInstance(MeshInstance(mesh.meshID, node->WorldMatrix(), mesh.materialID, node->name));
 					break;
 				}
 			}

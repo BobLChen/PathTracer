@@ -53,13 +53,13 @@ namespace GLSLPT
         Matrix4x4 xform;
         xform.SetScale(Vector3(0.01f, 0.01f, 0.01f), 1.0f);
 		
-		MeshInstance instance1(ceilingMeshID,   xform, whiteMatID);
-		MeshInstance instance2(floorMeshID,     xform, whiteMatID);
-		MeshInstance instance3(backMeshID,      xform, whiteMatID);
-		MeshInstance instance4(greenWallMeshID, xform, greenMatID);
-		MeshInstance instance5(largeBoxMeshID,  xform, whiteMatID);
-		MeshInstance instance6(redWallMeshID,   xform, redMatID);
-		MeshInstance instance7(smallBoxMeshID,  xform, whiteMatID);
+		MeshInstance instance1(ceilingMeshID,   xform, whiteMatID, "ceilling");
+		MeshInstance instance2(floorMeshID,     xform, whiteMatID, "floor");
+		MeshInstance instance3(backMeshID,      xform, whiteMatID, "back");
+		MeshInstance instance4(greenWallMeshID, xform, greenMatID, "green wall");
+		MeshInstance instance5(largeBoxMeshID,  xform, whiteMatID, "large box");
+		MeshInstance instance6(redWallMeshID,   xform, redMatID,   "red wall");
+		MeshInstance instance7(smallBoxMeshID,  xform, whiteMatID, "small box");
 
 		scene->AddMeshInstance(instance1);
 		scene->AddMeshInstance(instance2);

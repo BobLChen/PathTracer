@@ -44,10 +44,11 @@ namespace GLSLPT
 	class MeshInstance
 	{
 	public:
-		MeshInstance(int meshId, Matrix4x4 xform, int matId)
+		MeshInstance(int meshId, Matrix4x4 xform, int matId, const std::string& inName)
             : transform(xform)
             , materialID(matId)
 			, meshID(meshId)
+			, name(inName)
 		{
 
 		}
@@ -57,8 +58,9 @@ namespace GLSLPT
 
 		}
 
-		Matrix4x4 transform;
-		int materialID;
-		int meshID;
+		Matrix4x4	transform;
+		int			materialID;
+		int			meshID;
+		std::string name;
 	};
 }

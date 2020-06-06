@@ -229,7 +229,7 @@ void OnGUI(float deltaTime)
 
 		std::vector<std::string> listboxItems;
 		for (int i = 0; i < scene->meshInstances.size(); i++) {
-			listboxItems.push_back("Instance" + std::to_string(i));
+			listboxItems.push_back(scene->meshInstances[i].name);
 		}
 		
 		ImGui::ListBoxHeader("Instances");

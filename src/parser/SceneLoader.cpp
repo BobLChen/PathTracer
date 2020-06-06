@@ -282,8 +282,8 @@ namespace GLSLPT
                     int meshID = scene->AddMesh(rootPath + filename);
                     if (meshID != -1)
                     {
-                        MeshInstance instance1(meshID, xform, materialID);
-                        scene->AddMeshInstance(instance1);
+						std::string baseName = filename.substr(filename.find_last_of("/\\") + 1);
+                        scene->AddMeshInstance(MeshInstance(meshID, xform, materialID, baseName));
                     }
                 }
             }
