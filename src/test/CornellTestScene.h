@@ -11,20 +11,22 @@ namespace GLSLPT
 {
 	void LoadCornellTestScene(const std::string& rootPath, Scene* scene, RenderOptions &renderOptions)
 	{
-		renderOptions.maxDepth  = 5;
-		renderOptions.numTilesY = 5;
-		renderOptions.numTilesX = 5;
-		renderOptions.hdrMultiplier = 1.0f;
+		renderOptions.maxDepth  = 6;
+		renderOptions.numTilesY = 4;
+		renderOptions.numTilesX = 4;
+		renderOptions.intensity = 1.0f;
 		renderOptions.useEnvMap = true;
+
+		// scene->AddHDR(rootPath + "assets/HDR/photo_studio_01_1k.hdr");
 		scene->AddCamera(Vector3(0.276f, 0.275f, -0.75f), Vector3(0.276f, 0.275f, 0), 65.0f);
 
-		int ceiling_mesh_id   = scene->AddMesh(rootPath + "assets/cornell_box/cbox_ceiling.obj");
-		int floor_mesh_id     = scene->AddMesh(rootPath + "assets/cornell_box/cbox_floor.obj");
-		int back_mesh_id      = scene->AddMesh(rootPath + "assets/cornell_box/cbox_back.obj");
-		int greenwall_mesh_id = scene->AddMesh(rootPath + "assets/cornell_box/cbox_greenwall.obj");
-		int largebox_mesh_id  = scene->AddMesh(rootPath + "assets/cornell_box/cbox_largebox.obj");
-		int redwall_mesh_id   = scene->AddMesh(rootPath + "assets/cornell_box/cbox_redwall.obj");
-		int smallbox_mesh_id  = scene->AddMesh(rootPath + "assets/cornell_box/cbox_smallbox.obj");
+		int ceilingMeshID   = scene->AddMesh(rootPath + "assets/cornell_box/cbox_ceiling.obj");
+		int floorMeshID     = scene->AddMesh(rootPath + "assets/cornell_box/cbox_floor.obj");
+		int backMeshID      = scene->AddMesh(rootPath + "assets/cornell_box/cbox_back.obj");
+		int greenWallMeshID = scene->AddMesh(rootPath + "assets/cornell_box/cbox_greenwall.obj");
+		int largeBoxMeshID  = scene->AddMesh(rootPath + "assets/cornell_box/cbox_largebox.obj");
+		int redWallMeshID   = scene->AddMesh(rootPath + "assets/cornell_box/cbox_redwall.obj");
+		int smallBoxMeshID  = scene->AddMesh(rootPath + "assets/cornell_box/cbox_smallbox.obj");
 
 		Material white;
 		white.albedo = Vector3(0.725f, 0.71f, 0.68f);
@@ -35,30 +37,29 @@ namespace GLSLPT
 		Material green;
 		green.albedo = Vector3(0.14f, 0.45f, 0.091f);
 
-		int white_mat_id = scene->AddMaterial(white);
-		int red_mat_id = scene->AddMaterial(red);
-		int green_mat_id = scene->AddMaterial(green);
+		int whiteMatID = scene->AddMaterial(white);
+		int redMatID   = scene->AddMaterial(red);
+		int greenMatID = scene->AddMaterial(green);
 
 		Light light;
-		light.type = LightType::QuadLight;
+		light.type     = LightType::QuadLight;
 		light.position = Vector3(.34299999f, .54779997f, .22700010f);
-		light.u = Vector3(.34299999f, .54779997f, .33200008f) - light.position;
-		light.v = Vector3(.21300001f, .54779997f, .22700010f) - light.position;
-        light.area = Vector3::CrossProduct(light.u, light.v).Size();
+		light.u        = Vector3(.34299999f, .54779997f, .33200008f) - light.position;
+		light.v        = Vector3(.21300001f, .54779997f, .22700010f) - light.position;
+        light.area     = Vector3::CrossProduct(light.u, light.v).Size();
 		light.emission = Vector3(17, 12, 4);
-
 		scene->AddLight(light);
 
         Matrix4x4 xform;
         xform.SetScale(Vector3(0.01f, 0.01f, 0.01f), 1.0f);
 		
-		MeshInstance instance1(ceiling_mesh_id, xform, white_mat_id);
-		MeshInstance instance2(floor_mesh_id, xform, white_mat_id);
-		MeshInstance instance3(back_mesh_id, xform, white_mat_id);
-		MeshInstance instance4(greenwall_mesh_id, xform, green_mat_id);
-		MeshInstance instance5(largebox_mesh_id, xform, white_mat_id);
-		MeshInstance instance6(redwall_mesh_id, xform, red_mat_id);
-		MeshInstance instance7(smallbox_mesh_id, xform, white_mat_id);
+		MeshInstance instance1(ceilingMeshID,   xform, whiteMatID);
+		MeshInstance instance2(floorMeshID,     xform, whiteMatID);
+		MeshInstance instance3(backMeshID,      xform, whiteMatID);
+		MeshInstance instance4(greenWallMeshID, xform, greenMatID);
+		MeshInstance instance5(largeBoxMeshID,  xform, whiteMatID);
+		MeshInstance instance6(redWallMeshID,   xform, redMatID);
+		MeshInstance instance7(smallBoxMeshID,  xform, whiteMatID);
 
 		scene->AddMeshInstance(instance1);
 		scene->AddMeshInstance(instance2);
@@ -68,9 +69,6 @@ namespace GLSLPT
 		scene->AddMeshInstance(instance6);
 		scene->AddMeshInstance(instance7);
 
-		scene->AddHDR(rootPath + "assets/HDR/sunset.hdr");
-
 		scene->CreateAccelerationStructures();
-
 	}
 }

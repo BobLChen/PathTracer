@@ -4,7 +4,7 @@ Renderer
 	maxDepth 2
 	numTilesX 5
 	numTilesY 5
-	#envMap HDR/sunset.hdr
+	#envMap HDR/photo_studio_01_1k.hdr
 	hdrMultiplier 2.0
 }
 

@@ -17,24 +17,24 @@ namespace GLSLPT
 		Material()
 		{
 			albedo = Vector3(1.0f, 1.0f, 1.0f);
-			materialType = DISNEY;
+			type   = DISNEY;
 
 			emission = Vector3(0.0f, 0.0f, 0.0f);
-			unused = 0;
+			unused   = 0;
 
-			metallic = 0.0f;
+			metallic  = 0.0f;
 			roughness = 0.5f;
-			ior = 1.45f;
+			ior       = 1.45f;
 			transmittance = 0.0f;
 
-			albedoTexID = -1.0f;
-			metallicRoughnessTexID = -1.0f;
+			albedoTexID    = -1.0f;
+			paramsTexID    = -1.0f;
 			normalmapTexID = -1.0f;
-			heightmapTexID = -1.0f;
+			emissionTexID  = -1.0f;
 		};
 
 		Vector3 albedo;
-		float materialType;
+		float type;
 
 		Vector3 emission;
 		float unused;
@@ -45,8 +45,8 @@ namespace GLSLPT
 		float transmittance;
 
 		float albedoTexID;
-		float metallicRoughnessTexID;
+		float paramsTexID; // metallicRoughness
 		float normalmapTexID;
-		float heightmapTexID;
+		float emissionTexID;
 	};
 }

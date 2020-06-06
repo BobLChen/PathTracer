@@ -19,14 +19,11 @@ namespace GLSLPT
 {
 	struct GLTFNode
 	{
-		GLTFNode* parent = nullptr;
-
-		int meshID = -1;
-		int materialID = -1;
-
+		GLTFNode*	parent = nullptr;
+		int			meshID = -1;
+		int			materialID = -1;
 		std::string name;
-
-		Matrix4x4 matrix;
+		Matrix4x4	matrix;
 
 		Matrix4x4 WorldMatrix()
 		{
@@ -37,11 +34,11 @@ namespace GLSLPT
 			return transform;
 		}
 	};
-
+	
 	void LoadGLTFNode(GLTFNode* parent, tinygltf::Node& gltfNode, tinygltf::Model &gltfModel, std::vector<GLTFNode*>& nodes)
 	{
 		GLTFNode* node = new GLTFNode();
-		node->name = gltfNode.name;
+		node->name   = gltfNode.name;
 		node->parent = parent;
 
 		nodes.push_back(node);
@@ -137,7 +134,7 @@ namespace GLSLPT
 
 			if (gltfMat.values.find("metallicRoughnessTexture") != gltfMat.values.end()) 
 			{
-				material.metallicRoughnessTexID = textures[gltfMat.values["metallicRoughnessTexture"].TextureIndex()];
+				material.paramsTexID = textures[gltfMat.values["metallicRoughnessTexture"].TextureIndex()];
 				// gltfMat.values["metallicRoughnessTexture"].TextureTexCoord();
 			}
 
@@ -159,7 +156,7 @@ namespace GLSLPT
 
 			if (gltfMat.additionalValues.find("emissiveTexture") != gltfMat.additionalValues.end()) 
 			{
-				// material.emission = gltfMat.additionalValues["emissiveTexture"].TextureIndex();
+				material.emissionTexID = gltfMat.additionalValues["emissiveTexture"].TextureIndex();
 				// gltfMat.additionalValues["emissiveTexture"].TextureTexCoord();
 			}
 
@@ -168,12 +165,6 @@ namespace GLSLPT
 				material.emission.x = gltfMat.additionalValues["emissiveFactor"].ColorFactor().data()[0];
 				material.emission.y = gltfMat.additionalValues["emissiveFactor"].ColorFactor().data()[1];
 				material.emission.z = gltfMat.additionalValues["emissiveFactor"].ColorFactor().data()[2];
-			}
-
-			if (gltfMat.additionalValues.find("occlusionTexture") != gltfMat.additionalValues.end()) 
-			{
-				// material.occlusionTexture = gltfMat.additionalValues["occlusionTexture"].TextureIndex();
-				// gltfMat.additionalValues["occlusionTexture"].TextureTexCoord();
 			}
 
 			int materialID = scene->AddMaterial(material);
@@ -207,23 +198,19 @@ namespace GLSLPT
 
 				std::vector<Vector4> verticesUVX;
 				std::vector<Vector4> normalsUVY;
-				std::vector<int> indices;
-
-				uint8* bufferPos = nullptr;
-				uint8* bufferNormals = nullptr;
-				uint8* bufferUV0 = nullptr;
+				std::vector<int>     indices;
 
 				tinygltf::Accessor& posAccessor = gltfModel.accessors[primitive.attributes.find("POSITION")->second];
-				tinygltf::BufferView& posView = gltfModel.bufferViews[posAccessor.bufferView];
-				bufferPos = &(gltfModel.buffers[posView.buffer].data[posAccessor.byteOffset + posView.byteOffset]);
+				tinygltf::BufferView& posView   = gltfModel.bufferViews[posAccessor.bufferView];
+				uint8* bufferPos                = &(gltfModel.buffers[posView.buffer].data[posAccessor.byteOffset + posView.byteOffset]);
 
 				tinygltf::Accessor& normAccessor = gltfModel.accessors[primitive.attributes.find("NORMAL")->second];
-				tinygltf::BufferView& normView = gltfModel.bufferViews[normAccessor.bufferView];
-				bufferNormals = &(gltfModel.buffers[normView.buffer].data[normAccessor.byteOffset + normView.byteOffset]);
+				tinygltf::BufferView& normView   = gltfModel.bufferViews[normAccessor.bufferView];
+				uint8* bufferNormals             = &(gltfModel.buffers[normView.buffer].data[normAccessor.byteOffset + normView.byteOffset]);
 
 				tinygltf::Accessor& uvAccessor = gltfModel.accessors[primitive.attributes.find("TEXCOORD_0")->second];
-				tinygltf::BufferView& uvView = gltfModel.bufferViews[uvAccessor.bufferView];
-				bufferUV0 = &(gltfModel.buffers[uvView.buffer].data[uvAccessor.byteOffset + uvView.byteOffset]);
+				tinygltf::BufferView& uvView   = gltfModel.bufferViews[uvAccessor.bufferView];
+				uint8* bufferUV0               = &(gltfModel.buffers[uvView.buffer].data[uvAccessor.byteOffset + uvView.byteOffset]);
 
 				for (int32 v = 0; v < posAccessor.count; ++v)
 				{
@@ -231,24 +218,44 @@ namespace GLSLPT
 					Vector4 nrm;
 
 					// pos
+					if (bufferPos)
 					{
 						const float* buf = (const float*)(bufferPos);
 						pos.x = buf[v * 3 + 0];
 						pos.y = buf[v * 3 + 1];
 						pos.z = buf[v * 3 + 2];
 					}
+					else
+					{
+						pos.x = 0;
+						pos.y = 0;
+						pos.z = 0;
+					}
 					// uv
+					if (bufferUV0)
 					{
 						const float* buf = (const float*)(bufferUV0);
 						pos.w = buf[v * 2 + 0];
 						nrm.y = buf[v * 2 + 1];
 					}
+					else
+					{
+						pos.w = 0;
+						nrm.y = 0;
+					}
 					// normal
+					if (bufferNormals)
 					{
 						const float* buf = (const float*)(bufferNormals);
 						nrm.x = buf[v * 3 + 0];
 						nrm.y = buf[v * 3 + 1];
 						nrm.z = buf[v * 3 + 2];
+					}
+					else
+					{
+						nrm.x = 0;
+						nrm.y = 0;
+						nrm.z = 0;
 					}
 
 					verticesUVX.push_back(pos);
@@ -256,9 +263,9 @@ namespace GLSLPT
 				}
 
 				// indices
-				tinygltf::Accessor& indicesAccessor = gltfModel.accessors[primitive.indices];
+				tinygltf::Accessor& indicesAccessor     = gltfModel.accessors[primitive.indices];
 				tinygltf::BufferView& indicesBufferView = gltfModel.bufferViews[indicesAccessor.bufferView];
-				uint8* bufferIndices = &(gltfModel.buffers[indicesBufferView.buffer].data[indicesAccessor.byteOffset + indicesBufferView.byteOffset]);
+				uint8* bufferIndices                    = &(gltfModel.buffers[indicesBufferView.buffer].data[indicesAccessor.byteOffset + indicesBufferView.byteOffset]);
 
 				for (int32 v = 0; v < indicesAccessor.count; ++v)
 				{
@@ -292,8 +299,8 @@ namespace GLSLPT
 				}
 
 				int meshID = scene->AddMesh(mesh);
-				int materialID = materials[primitive.material];
-				meshes.push_back(GLTFMesh(i, meshID, materialID));
+				int matID  = materials[primitive.material];
+				meshes.push_back(GLTFMesh(i, meshID, matID));
 			}
 		}
 
@@ -310,19 +317,17 @@ namespace GLSLPT
 		// instances
 		for (int i = 0; i < nodeList.size(); ++i)
 		{
-			if (nodeList[i]->meshID == -1) {
+			GLTFNode* node = nodeList[i];
+			if (node->meshID == -1) {
 				continue;
 			}
 
 			for (int j = 0; j < meshes.size(); ++j) 
 			{
-				if (meshes[j].mesh == nodeList[i]->meshID) 
+				GLTFMesh& mesh = meshes[j];
+				if (mesh.mesh == node->meshID)
 				{
-					int meshID = meshes[j].meshID;
-					int materialID = meshes[j].materialID;
-					Matrix4x4 transform = nodeList[j]->WorldMatrix();
-					MeshInstance instance1(meshID, transform, materialID);
-					scene->AddMeshInstance(instance1);
+					scene->AddMeshInstance(MeshInstance(mesh.meshID, node->WorldMatrix(), mesh.materialID));
 					break;
 				}
 			}
@@ -335,7 +340,7 @@ namespace GLSLPT
 		renderOptions.maxDepth  = 4;
 		renderOptions.numTilesY = 4;
 		renderOptions.numTilesX = 4;
-		renderOptions.hdrMultiplier = 1.0f;
+		renderOptions.intensity = 1.0f;
 		renderOptions.useEnvMap = true;
 
 		scene->AddCamera(Vector3(0.0f, 10.0f, -10.0f), Vector3(0.0f, 0.0f, 0.0f), 60.0f);

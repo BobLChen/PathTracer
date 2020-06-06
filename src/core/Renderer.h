@@ -17,12 +17,12 @@ namespace GLSLPT
     {
         RenderOptions()
         {
-            maxDepth  = 4;
-            numTilesX = 8;
-            numTilesY = 8;
-            useEnvMap = false;
+            maxDepth   = 4;
+            numTilesX  = 4;
+            numTilesY  = 4;
+            useEnvMap  = false;
             resolution = Vector2(1280, 720);
-            hdrMultiplier = 1.0f;
+			intensity  = 1.0f;
         }
 
         Vector2 resolution;
@@ -30,7 +30,7 @@ namespace GLSLPT
         int numTilesX;
         int numTilesY;
         bool useEnvMap;
-        float hdrMultiplier;
+        float intensity;
     };
 
     class Scene;

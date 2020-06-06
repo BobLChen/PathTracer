@@ -35,22 +35,24 @@ RenderOptions renderOptions;
 void LoadSampleScene(int index)
 {
 	std::string path(EMBED_RES_PATH);
-
 	if (scene) {
 		delete scene;
 		scene = nullptr;
 	}
 	scene = new Scene();
 
-     switch (index)
-     {
-         case 0:
-             LoadSceneFromFile(path + "assets/hyperion.scene", scene, renderOptions);
-             break;
-         case 1:
-             LoadSceneFromFile(path + "assets/cornell_box.scene", scene, renderOptions);
-             break;
-     }
+    switch (index)
+    {
+	case 0:
+		LoadSceneFromFile(path + "assets/hyperion.scene", scene, renderOptions);
+		break;
+	case 1:
+		LoadSceneFromFile(path + "assets/cornell_box.scene", scene, renderOptions);
+		break;
+	case 2:
+		LoadBoyTestScene(path, scene, renderOptions);
+		break;
+    }
 
 	// LoadSceneFromGLTF(path + "assets/diorama.glb", scene, renderOptions);
 
@@ -185,7 +187,7 @@ void OnGUI(float deltaTime)
 	ImGui::BulletText("MMB + drag to rotate");
 	ImGui::BulletText("SHIFT + MMB + drag to pan");
 
-	if (ImGui::Combo("Scene", &sampleSceneIndex, "Hyperion\0Cornell Box\0"))
+	if (ImGui::Combo("Scene", &sampleSceneIndex, "Hyperion\0Cornell Box\0Boy\0"))
 	{
 		LoadSampleScene(sampleSceneIndex);
 		InitRenderer();
@@ -196,7 +198,7 @@ void OnGUI(float deltaTime)
 	{
 		optionsChanged |= ImGui::SliderInt("Max Depth", &renderOptions.maxDepth, 1, 10);
 		optionsChanged |= ImGui::Checkbox("Use envmap", &renderOptions.useEnvMap);
-		optionsChanged |= ImGui::SliderFloat("HDR multiplier", &renderOptions.hdrMultiplier, 0.1, 10);
+		optionsChanged |= ImGui::SliderFloat("HDR multiplier", &renderOptions.intensity, 0.1, 10);
 	}
 
 	if (ImGui::CollapsingHeader("Camera"))

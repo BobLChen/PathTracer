@@ -43,15 +43,13 @@ namespace GLSLPT
     {
 		std::string rootPath = filename.substr(0, filename.find_last_of("/\\")) + "/";
 
-        FILE* file;
-        file = fopen(filename.c_str(), "r");
-
+        FILE* file = fopen(filename.c_str(), "r");
         if (!file)
         {
             printf("Couldn't open %s for reading\n", filename.c_str());
             return false;
         }
-
+		
         printf("Loading Scene..\n");
 
         struct MaterialData
@@ -61,6 +59,7 @@ namespace GLSLPT
         };
 
         std::map<std::string, MaterialData> materialMap;
+
         std::vector<std::string> albedoTex;
         std::vector<std::string> metallicRoughnessTex;
         std::vector<std::string> normalTex;
@@ -90,7 +89,7 @@ namespace GLSLPT
             {
                 Material material;
                 char albedoTexName[100] = "None";
-                char metallicRoughnessTexName[100] = "None";
+                char paramsTexName[100] = "None"; // metallic and roughness
                 char normalTexName[100] = "None";
 
                 while (fgets(line, s_MAX_LINE_LENGTH, file))
@@ -103,14 +102,14 @@ namespace GLSLPT
                     sscanf(line, " name %s", name);
                     sscanf(line, " color %f %f %f", &material.albedo.x, &material.albedo.y, &material.albedo.z);
                     sscanf(line, " emission %f %f %f", &material.emission.x, &material.emission.y, &material.emission.z);
-                    sscanf(line, " materialType %f", &material.materialType);
+                    sscanf(line, " materialType %f", &material.type);
                     sscanf(line, " metallic %f", &material.metallic);
                     sscanf(line, " roughness %f", &material.roughness);
                     sscanf(line, " ior %f", &material.ior);
                     sscanf(line, " transmittance %f", &material.transmittance);
 
                     sscanf(line, " albedoTexture %s", albedoTexName);
-                    sscanf(line, " metallicRoughnessTexture %s", metallicRoughnessTexName);
+                    sscanf(line, " metallicRoughnessTexture %s", paramsTexName);
                     sscanf(line, " normalTexture %s", normalTexName);
                 }
 
@@ -120,8 +119,8 @@ namespace GLSLPT
 				}
                 
                 // MetallicRoughness Texture
-				if (strcmp(metallicRoughnessTexName, "None") != 0) {
-					material.metallicRoughnessTexID = scene->AddTexture(rootPath + metallicRoughnessTexName);
+				if (strcmp(paramsTexName, "None") != 0) {
+					material.paramsTexID = scene->AddTexture(rootPath + paramsTexName);
 				}
                 
                 // Normal Map Texture
@@ -164,8 +163,8 @@ namespace GLSLPT
                if (strcmp(lightType, "Quad") == 0)
                 {
                     light.type = LightType::QuadLight;
-                    light.u = v1 - light.position;
-                    light.v = v2 - light.position;
+                    light.u    = v1 - light.position;
+                    light.v    = v2 - light.position;
                     light.area = Vector3::CrossProduct(light.u, light.v).Size();
                 }
                 else if (strcmp(lightType, "Sphere") == 0)
@@ -183,8 +182,10 @@ namespace GLSLPT
             {
                 Vector3 position;
                 Vector3 lookAt;
+
                 float fov;
-                float aperture = 0, focalDist = 1;
+                float aperture = 0;
+				float focalDist = 1;
 
                 while (fgets(line, s_MAX_LINE_LENGTH, file))
                 {
@@ -201,7 +202,7 @@ namespace GLSLPT
                 }
 
                 scene->AddCamera(position, lookAt, fov);
-                scene->camera->aperture = aperture;
+                scene->camera->aperture  = aperture;
                 scene->camera->focalDist = focalDist;
 
                 cameraAdded = true;
@@ -222,7 +223,7 @@ namespace GLSLPT
                     
                     sscanf(line, " envMap %s", envMap);
                     sscanf(line, " resolution %f %f", &renderOptions.resolution.x, &renderOptions.resolution.y);
-                    sscanf(line, " hdrMultiplier %f", &renderOptions.hdrMultiplier);
+                    sscanf(line, " hdrMultiplier %f", &renderOptions.intensity);
                     sscanf(line, " maxDepth %i", &renderOptions.maxDepth);
                     sscanf(line, " numTilesX %i", &renderOptions.numTilesX);
                     sscanf(line, " numTilesY %i", &renderOptions.numTilesY);
@@ -230,7 +231,7 @@ namespace GLSLPT
 
                 if (strcmp(envMap, "None") != 0)
                 {
-                    scene->AddHDR(envMap);
+                    scene->AddHDR(rootPath + envMap);
                     renderOptions.useEnvMap = true;
                 }
             }
@@ -243,7 +244,7 @@ namespace GLSLPT
                 Vector3 pos;
                 Vector3 scale;
                 Matrix4x4 xform;
-                int material_id = 0; // Default Material ID
+                int materialID = 0; // Default Material ID
 
                 while (fgets(line, s_MAX_LINE_LENGTH, file))
                 {
@@ -255,8 +256,7 @@ namespace GLSLPT
                     char file[2048];
                     char matName[100];
 
-                    if (sscanf(line, " file %s", file) == 1)
-                    {
+                    if (sscanf(line, " file %s", file) == 1) {
                         filename = file;
                     }
 
@@ -265,7 +265,7 @@ namespace GLSLPT
                         // look up material in dictionary
                         if (materialMap.find(matName) != materialMap.end())
                         {
-                            material_id = float(materialMap[matName].id);
+                            materialID = float(materialMap[matName].id);
                         }
                         else
                         {
@@ -279,10 +279,10 @@ namespace GLSLPT
 
                 if (!filename.empty())
                 {
-                    int mesh_id = scene->AddMesh(rootPath + filename);
-                    if (mesh_id != -1)
+                    int meshID = scene->AddMesh(rootPath + filename);
+                    if (meshID != -1)
                     {
-                        MeshInstance instance1(mesh_id, xform, material_id);
+                        MeshInstance instance1(meshID, xform, materialID);
                         scene->AddMeshInstance(instance1);
                     }
                 }
