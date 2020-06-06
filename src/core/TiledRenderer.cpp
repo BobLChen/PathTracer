@@ -243,12 +243,6 @@ namespace GLSLPT
 
 		if (!scene->camera->isMoving && !scene->instancesModified)
 		{
-			// pathTraceShader->Active();
-			// GLuint shaderObject = pathTraceShader->Object();
-			// glUniform1i(glGetUniformLocation(shaderObject, "tileX"), tileX);
-			// glUniform1i(glGetUniformLocation(shaderObject, "tileY"), tileY);
-			// pathTraceShader->Deactive();
-			
 			glBindFramebuffer(GL_FRAMEBUFFER, pathTraceFBO);
 			glViewport(0, 0, tileWidth, tileHeight);
 			quad->Draw(pathTraceShader);
@@ -285,6 +279,8 @@ namespace GLSLPT
 			glBindTexture(GL_TEXTURE_2D, pathTraceTextureLowRes);
 			quad->Draw(outputShader);
 		}
+
+		scene->camera->isMoving = false;
     }
 
     float TiledRenderer::GetProgress() const
@@ -352,26 +348,26 @@ namespace GLSLPT
 			pathTraceShader->Active();
 			shaderObject = pathTraceShader->Object();
 			glUniform3f(glGetUniformLocation(shaderObject, "camera.position"),
-                scene->camera->position.x,
-                scene->camera->position.y,
-                scene->camera->position.z
+                scene->camera->GetPosition().x,
+                scene->camera->GetPosition().y,
+                scene->camera->GetPosition().z
             );
 			glUniform3f(glGetUniformLocation(shaderObject, "camera.right"),
-                scene->camera->right.x,
-                scene->camera->right.y,
-                scene->camera->right.z
+                scene->camera->GetRight().x,
+                scene->camera->GetRight().y,
+                scene->camera->GetRight().z
             );
 			glUniform3f(glGetUniformLocation(shaderObject, "camera.up"),
-                scene->camera->up.x,
-                scene->camera->up.y,
-                scene->camera->up.z
+                scene->camera->GetUp().x,
+                scene->camera->GetUp().y,
+                scene->camera->GetUp().z
             );
 			glUniform3f(glGetUniformLocation(shaderObject, "camera.forward"),
-                scene->camera->forward.x,
-                scene->camera->forward.y,
-                scene->camera->forward.z
+                scene->camera->GetForward().x,
+                scene->camera->GetForward().y,
+                scene->camera->GetForward().z
             );
-			glUniform1f(glGetUniformLocation(shaderObject, "camera.fov"), scene->camera->fov);
+			glUniform1f(glGetUniformLocation(shaderObject, "camera.fov"), scene->camera->GetFov());
 			glUniform1f(glGetUniformLocation(shaderObject, "camera.focalDist"), scene->camera->focalDist);
 			glUniform1f(glGetUniformLocation(shaderObject, "camera.aperture"), scene->camera->aperture);
 			glUniform3f(glGetUniformLocation(shaderObject, "randomVector"), r1, r2, r3);
@@ -386,27 +382,27 @@ namespace GLSLPT
 		{
 			pathTraceShaderLowRes->Active();
 			shaderObject = pathTraceShaderLowRes->Object();
-            glUniform3f(glGetUniformLocation(shaderObject, "camera.position"),
-                scene->camera->position.x,
-                scene->camera->position.y,
-                scene->camera->position.z
-            );
-            glUniform3f(glGetUniformLocation(shaderObject, "camera.right"),
-                scene->camera->right.x,
-                scene->camera->right.y,
-                scene->camera->right.z
-            );
-            glUniform3f(glGetUniformLocation(shaderObject, "camera.up"),
-                scene->camera->up.x,
-                scene->camera->up.y,
-                scene->camera->up.z
-            );
-            glUniform3f(glGetUniformLocation(shaderObject, "camera.forward"),
-                scene->camera->forward.x,
-                scene->camera->forward.y,
-                scene->camera->forward.z
-            );
-			glUniform1f(glGetUniformLocation(shaderObject, "camera.fov"), scene->camera->fov);
+			glUniform3f(glGetUniformLocation(shaderObject, "camera.position"),
+				scene->camera->GetPosition().x,
+				scene->camera->GetPosition().y,
+				scene->camera->GetPosition().z
+			);
+			glUniform3f(glGetUniformLocation(shaderObject, "camera.right"),
+				scene->camera->GetRight().x,
+				scene->camera->GetRight().y,
+				scene->camera->GetRight().z
+			);
+			glUniform3f(glGetUniformLocation(shaderObject, "camera.up"),
+				scene->camera->GetUp().x,
+				scene->camera->GetUp().y,
+				scene->camera->GetUp().z
+			);
+			glUniform3f(glGetUniformLocation(shaderObject, "camera.forward"),
+				scene->camera->GetForward().x,
+				scene->camera->GetForward().y,
+				scene->camera->GetForward().z
+			);
+			glUniform1f(glGetUniformLocation(shaderObject, "camera.fov"), scene->camera->GetFov());
 			glUniform1f(glGetUniformLocation(shaderObject, "camera.focalDist"), scene->camera->focalDist);
 			glUniform1f(glGetUniformLocation(shaderObject, "camera.aperture"), scene->camera->aperture);
 			glUniform3f(glGetUniformLocation(shaderObject, "randomVector"), r1, r2, r3);

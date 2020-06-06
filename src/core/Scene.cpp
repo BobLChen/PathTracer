@@ -9,10 +9,9 @@ namespace GLSLPT
 {
 	Scene::Scene() 
 		: hdrData(nullptr)
-		, camera(nullptr) 
+		, camera(nullptr)
+		, sceneBvh(nullptr)
 	{
-		sceneBvh = new RadeonRays::Bvh(10.0f, 64, false);
-
 		taskPool = new TaskThreadPool();
 		taskPool->Create(std::max((int)std::thread::hardware_concurrency(), 8));
 	}
@@ -295,7 +294,15 @@ namespace GLSLPT
 
 			bounds[i] = bound;
 		}
+
+		if (sceneBvh)
+		{
+			delete sceneBvh;
+			sceneBvh = nullptr;
+		}
+		sceneBvh = new RadeonRays::Bvh(10.0f, 64, false);
 		sceneBvh->Build(&bounds[0], bounds.size());
+
 		sceneBounds = sceneBvh->Bounds();
 	}
 
@@ -348,6 +355,18 @@ namespace GLSLPT
 			}
 		}
 	}
+
+	void Scene::Update(float deltaTime)
+	{
+		camera->Perspective(camera->GetFov(), renderOptions.resolution.x, renderOptions.resolution.y, camera->GetNear(), camera->GetFar());
+		camera->Update(deltaTime);
+	}
+	
+	void Scene::Resize(int width, int height)
+	{
+		renderOptions.resolution.x = width;
+		renderOptions.resolution.y = height;
+	}
 	
 	void Scene::RebuildInstancesData()
 	{
@@ -357,21 +376,23 @@ namespace GLSLPT
 			sceneBvh = nullptr;
 		}
 		
-		sceneBvh = new RadeonRays::Bvh(10.0f, 64, false);
-
 		CreateTLAS();
+
 		bvhTranslator.UpdateTLAS(sceneBvh, meshInstances);
 		
 		// Copy transforms
-		for (int i = 0; i < meshInstances.size(); i++) {
+		for (int i = 0; i < meshInstances.size(); i++) 
+		{
 			transforms[i] = meshInstances[i].transform;
 		}
-			
+		
 		instancesModified = true;
 	}
 
 	void Scene::CreateAccelerationStructures()
 	{
+		camera->Perspective(camera->GetFov(), renderOptions.resolution.x, renderOptions.resolution.y, 0.1f, 3000.0f);
+
 		LoadAssets();
 
 		CreateBLAS();

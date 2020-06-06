@@ -6,13 +6,33 @@
 
 namespace GLSLPT
 {
-	void Frustum(float left, float right, float bottom, float top, float znear, float zfar, float* m16)
+	void Cross(const float* a, const float* b, float* r)
 	{
-		float temp  = 2.0f * znear;
-		float temp2 = right - left;
-		float temp3 = top - bottom;
-		float temp4 = zfar - znear;
+		r[0] = a[1] * b[2] - a[2] * b[1];
+		r[1] = a[2] * b[0] - a[0] * b[2];
+		r[2] = a[0] * b[1] - a[1] * b[0];
+	}
 
+	float Dot(const float* a, const float* b)
+	{
+		return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+	}
+
+	void Normalize(const float* a, float* r)
+	{
+		float il = 1.f / (sqrtf(Dot(a, a)) + FLT_EPSILON);
+		r[0] = a[0] * il;
+		r[1] = a[1] * il;
+		r[2] = a[2] * il;
+	}
+
+	void GizmoFrustum(float left, float right, float bottom, float top, float znear, float zfar, float* m16)
+	{
+		float temp, temp2, temp3, temp4;
+		temp = 2.0f * znear;
+		temp2 = right - left;
+		temp3 = top - bottom;
+		temp4 = zfar - znear;
 		m16[0] = temp / temp2;
 		m16[1] = 0.0;
 		m16[2] = 0.0;
@@ -31,52 +51,39 @@ namespace GLSLPT
 		m16[15] = 0.0;
 	}
 
-	void Perspective(float fovyInDegrees, float aspectRatio, float znear, float zfar, float* m16)
+	void GizmoPerspective(float fovyInDegrees, float aspectRatio, float znear, float zfar, float* m16)
 	{
-		float ymax = znear * tanf(fovyInDegrees * PI / 180.0f);
-		float xmax = ymax * aspectRatio;
-		Frustum(-xmax, xmax, -ymax, ymax, znear, zfar, m16);
+		float ymax, xmax;
+		ymax = znear * tanf(fovyInDegrees * 3.141592f / 180.0f);
+		xmax = ymax * aspectRatio;
+		GizmoFrustum(-xmax, xmax, -ymax, ymax, znear, zfar, m16);
 	}
 
-	void Cross(const float* a, const float* b, float* r)
+	void GizmoLookAt(const float* eye, const float* at, const float* up, float* m16)
 	{
-		r[0] = a[1] * b[2] - a[2] * b[1];
-		r[1] = a[2] * b[0] - a[0] * b[2];
-		r[2] = a[0] * b[1] - a[1] * b[0];
-	}
-
-	float Dot(const float* a, const float* b)
-	{
-		return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-	}
-
-	void Normalize(const float* a, float* r)
-	{
-		float il = 1.f / (sqrtf(Dot(a, a)) + 0.0001f);
-		r[0] = a[0] * il;
-		r[1] = a[1] * il;
-		r[2] = a[2] * il;
-	}
-
-	void LookAt(const float* eye, const float* at, const float* up, float* m16)
-	{
-		float X[3];
-		float Y[3];
-		float Z[3];
-		float tmp[3];
+		float X[3], Y[3], Z[3], tmp[3];
 
 		tmp[0] = eye[0] - at[0];
 		tmp[1] = eye[1] - at[1];
 		tmp[2] = eye[2] - at[2];
-
+		//Z.normalize(eye - at);
 		Normalize(tmp, Z);
 		Normalize(up, Y);
+		//Y.normalize(up);
 
 		Cross(Y, Z, tmp);
+		//tmp.cross(Y, Z);
 		Normalize(tmp, X);
+		//X.normalize(tmp);
 
 		Cross(Z, X, tmp);
+		//tmp.cross(Z, X);
 		Normalize(tmp, Y);
+		//Y.normalize(tmp);
+
+		X[0] = -X[0];
+		X[1] = -X[1];
+		X[2] = -X[2];
 
 		m16[0] = X[0];
 		m16[1] = Y[0];
@@ -96,95 +103,85 @@ namespace GLSLPT
 		m16[15] = 1.0f;
 	}
 
+	Camera::Camera()
+	{
+		SetPosition(Vector3(0.0f, 0.0f, -10.0f));
+	}
+
 	Camera::Camera(const Vector3& eye, const Vector3& lookat, float inFov)
 	{
-		position = eye;
-		pivot    = lookat;
-		worldUp  = Vector3(0, 1, 0);
-
-		Vector3 dir = (pivot - position).GetSafeNormal();
-        
-        pitch = MMath::RadiansToDegrees(MMath::Asin(dir.y));
-        yaw = MMath::RadiansToDegrees(MMath::Atan2(dir.z, dir.x));
-        radius = (eye - lookat).Size();
-        fov = MMath::DegreesToRadians(inFov);
-        
-		focalDist = 0.1f;
-		aperture = 0.0;
-		UpdateCamera();
+		SetPosition(eye);
+		LookAt(lookat);
+		m_Fov = MMath::DegreesToRadians(inFov);
 	}
 
-	Camera::Camera(const Camera& other)
+	void Camera::GetGizmoViewProjection(float* view, float* projection)
 	{
-		*this = other;
+		Vector3 at = GetPosition() + GetForward();
+		Vector3 p  = GetPosition();
+		Vector3 up = GetUp();
+		GizmoLookAt((float*)&p, (float*)&at, (float*)&up, view);
+
+		float ratio = m_Width / m_Height;
+		float fov_v = (1.f / ratio) * MMath::Tan(m_Fov / 2.f);
+		GizmoPerspective(MMath::RadiansToDegrees(fov_v), ratio, m_Near, m_Far, projection);
 	}
 
-	Camera& Camera::operator = (const Camera& other)
+	void Camera::OnMousePos(const Vector2 mousePos)
 	{
-		position = other.position;
-		pivot = other.pivot;
-		up = other.up;
-		right = other.right;
-		forward = other.forward;
-		worldUp = other.worldUp;
-
-		pitch = other.pitch;
-		yaw = other.yaw;
-		fov = other.fov;
-		focalDist = other.focalDist;
-		aperture = other.aperture;
-		radius = other.radius;
-		isMoving = other.isMoving;
-
-		return *this;
+		m_CurrMouse  = mousePos;
 	}
 
-	void Camera::OffsetOrientation(float dx, float dy)
+	void Camera::OnRMouse(bool down)
 	{
-		pitch -= dy;
-		yaw += dx;
-		UpdateCamera();
+		m_RMouseDown = down;
 	}
 
-	void Camera::Strafe(float dx, float dy)
+	void Camera::OnMMouse(bool down)
 	{
-		Vector3 translation = -dx * right + dy * up;
-		pivot = pivot + translation;
-		UpdateCamera();
+		m_MMouseDown = down;
 	}
 
-	void Camera::ChangeRadius(float dr)
+	void Camera::OnMouseWheel(float wheel)
 	{
-		radius += dr;
-		UpdateCamera();
+		m_MouseWheel = wheel;
 	}
 
-	void Camera::SetFov(float val)
+	void Camera::Update(float delta)
 	{
-		fov = MMath::DegreesToRadians(val);
-	}
+		float mouseSpeedX = m_CurrMouse.x - m_LastMouse.x;
+		float mouseSpeedY = m_CurrMouse.y - m_LastMouse.y;
 
-	void Camera::UpdateCamera()
-	{
-		Vector3 forward_temp;
-        forward_temp.x = MMath::Cos(MMath::DegreesToRadians(yaw)) * MMath::Cos(MMath::DegreesToRadians(pitch));
-        forward_temp.y = MMath::Sin(MMath::DegreesToRadians(pitch));
-        forward_temp.z = MMath::Sin(MMath::DegreesToRadians(yaw)) * MMath::Cos(MMath::DegreesToRadians(pitch));
+		if (m_MMouseDown)
+		{
+			m_World.TranslateX(-mouseSpeedX * m_World.GetOrigin().Size() / 300);
+			m_World.TranslateY( mouseSpeedY * m_World.GetOrigin().Size() / 300);
+		}
+		else if (m_RMouseDown)
+		{
+			m_SpinX += mouseSpeedX * smooth * speedFactor;
+			m_SpinY += mouseSpeedY * smooth * speedFactor;
+		}
 
-        forward = forward_temp.GetSafeNormal();
-		position = pivot + -forward * radius;
+		if (m_MouseWheel != 0.0f) 
+		{
+			m_SpinZ = (m_World.GetOrigin().Size() + 0.1f) * speedFactor * m_MouseWheel / 20.0f;
+		}
 
-        
-		right = Vector3::CrossProduct(forward, worldUp).GetSafeNormal();
-		up = Vector3::CrossProduct(right, forward).GetSafeNormal();
-	}
+		m_World.TranslateZ(m_SpinZ);
+		m_World.RotateY(m_SpinX, false, &Vector3::ZeroVector);
+		m_World.RotateX(m_SpinY, true,  &Vector3::ZeroVector);
 
-	void Camera::ComputeViewProjectionMatrix(float* view, float* projection, float ratio)
-	{
-		auto at = position + forward;
-		LookAt(&position.x, &at.x, &up.x, view);
-		float rfov = (1.f / ratio) * tanf(fov / 2.f);
-        Perspective(MMath::RadiansToDegrees(rfov), ratio, 0.1f, 3000.f, projection);
+		if ((m_SpinX != 0.0f || m_SpinY != 0.0f || m_SpinZ != 0.0f) || m_MMouseDown) 
+		{
+			isMoving = true;
+		}
+
+		m_SpinX *= (1 - smooth);
+		m_SpinY *= (1 - smooth);
+		m_SpinZ *= (1 - smooth);
+
+		m_LastMouse = m_CurrMouse;
 	}
 
 }

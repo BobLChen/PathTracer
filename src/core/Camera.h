@@ -1,6 +1,9 @@
 #pragma once
 
+#include "math/Matrix4x4.h"
+#include "math/Vector2.h"
 #include "math/Vector3.h"
+#include "math/Vector4.h"
 
 namespace GLSLPT
 {
@@ -9,30 +12,228 @@ namespace GLSLPT
 	public:
 		Camera(const Vector3& eye, const Vector3& lookat, float fov);
 
-		Camera(const Camera& other);
+		Camera();
 
-		Camera& operator = (const Camera& other);
+		inline void TranslateX(float distance)
+		{
+			m_World.TranslateX(distance);
+		}
 
-		void OffsetOrientation(float dx, float dy);
-		void Strafe(float dx, float dy);
-		void ChangeRadius(float dr);
-		void UpdateCamera();
-		void ComputeViewProjectionMatrix(float* view, float* projection, float ratio);
-		void SetFov(float val);
+		inline void TranslateY(float distance)
+		{
+			m_World.TranslateY(distance);
+		}
 
-		Vector3 position;
-		Vector3 pivot;
-		Vector3 up;
-		Vector3 right;
-		Vector3 forward;
-		Vector3 worldUp;
+		inline void TranslateZ(float distance)
+		{
+			m_World.TranslateZ(distance);
+		}
 
-		float pitch;
-		float yaw;
-		float fov;
-		float focalDist;
-		float aperture;
-		float radius;
-		bool isMoving;
+		inline void RotateX(float angle)
+		{
+			m_World.RotateX(angle);
+		}
+
+		inline void RotateY(float angle)
+		{
+			m_World.RotateY(angle);
+		}
+
+		inline void RotateZ(float angle)
+		{
+			m_World.RotateZ(angle);
+		}
+
+		inline void LookAt(float x, float y, float z, float smooth = 1.0f)
+		{
+			LookAt(Vector3(x, y, z), smooth);
+		}
+
+		inline void LookAt(const Vector3& target, float smooth = 1.0f)
+		{
+			m_World.LookAt(target, nullptr, smooth);
+		}
+
+		inline void LookAt(const Vector3& target, const Vector3& up, float smooth = 1.0f)
+		{
+			m_World.LookAt(target, &up, smooth);
+		}
+
+		inline Vector3 GetPosition()
+		{
+			return m_World.GetOrigin();
+		}
+
+		inline void SetPosition(const Vector3& pos)
+		{
+			m_World.SetPosition(pos);
+		}
+
+		inline void SetPosition(float x, float y, float z)
+		{
+			m_World.SetPosition(Vector3(x, y, z));
+		}
+
+		inline void SetOrientation(const Vector3& dir)
+		{
+			m_World.SetOrientation(dir, &Vector3::UpVector, 1.0f);
+		}
+
+		inline void SetRotation(const Vector3& rotation)
+		{
+			m_World.SetRotation(rotation);
+		}
+
+		inline void SetRotation(float eulerX, float eulerY, float eulerZ)
+		{
+			m_World.SetRotation(Vector3(eulerX, eulerY, eulerZ));
+		}
+
+		inline Vector3 GetRight() const
+		{
+			return m_World.GetRight();
+		}
+
+		inline Vector3 GetUp() const
+		{
+			return m_World.GetUp();
+		}
+
+		inline Vector3 GetForward() const
+		{
+			return m_World.GetForward();
+		}
+
+		inline Vector3 GetLeft() const
+		{
+			return m_World.GetLeft();
+		}
+
+		inline Vector3 GetBackward() const
+		{
+			return m_World.GetBackward();
+		}
+
+		inline Vector3 GetDown() const
+		{
+			return m_World.GetDown();
+		}
+
+		inline const Matrix4x4& GetView()
+		{
+			m_View = m_World.Inverse();
+			return m_View;
+		}
+
+		inline const Matrix4x4& GetProjection()
+		{
+			return m_Projection;
+		}
+
+		inline const Matrix4x4& GetViewProjection()
+		{
+			m_View = m_World.Inverse();
+			m_ViewProjection = m_View * m_Projection;
+			return m_ViewProjection;
+		}
+
+		inline void SetTransform(const Matrix4x4& world)
+		{
+			m_World = world;
+		}
+
+		inline const Matrix4x4& GetTransform()
+		{
+			return m_World;
+		}
+
+		inline void Perspective(float fovy, float width, float height, float zNear, float zFar)
+		{
+			m_Fov    = fovy;
+			m_Near   = zNear;
+			m_Far    = zFar;
+			m_Aspect = width / height;
+			m_Width  = width;
+			m_Height = height;
+
+			m_Projection.Perspective(fovy, width, height, zNear, zFar);
+		}
+
+		inline void SetFov(float fov)
+		{
+			m_Fov = fov;
+			m_Projection.Perspective(m_Fov, m_Width, m_Height, m_Near, m_Far);
+		}
+
+		inline float GetNear() const
+		{
+			return m_Near;
+		}
+
+		inline float GetFar() const
+		{
+			return m_Far;
+		}
+
+		inline float GetFov() const
+		{
+			return m_Fov;
+		}
+
+		inline float GetAspect() const
+		{
+			return m_Aspect;
+		}
+
+		void GetGizmoViewProjection(float* view, float* projection);
+
+		void Update(float delta);
+
+		void OnMousePos(const Vector2 mousePos);
+
+		void OnRMouse(bool down);
+
+		void OnMMouse(bool down);
+
+		void OnMouseWheel(float wheel);
+
+	public:
+
+		float		smooth = 1.0f;
+		float		speed = 1.0f;
+		float		speedFactor = 0.5f;
+
+		float		focalDist = 0.0;
+		float		aperture = 0.0;
+
+		bool        isMoving = false;
+
+	protected:
+
+		bool        m_RMouseDown = false;
+		bool        m_MMouseDown = false;
+
+		Vector2		m_LastMouse;
+		Vector2     m_CurrMouse;
+		float		m_MouseWheel = 0.0f;
+
+		float		m_SpinX = 0.0f;
+		float		m_SpinY = 0.0f;
+		float		m_SpinZ = 0.0f;
+		
+		Matrix4x4	m_World;
+		Matrix4x4	m_View;
+		Matrix4x4	m_Projection;
+		Matrix4x4	m_ViewProjection;
+
+		float		m_Near = 1.0f;
+		float		m_Far = 3000.0f;
+		float       m_Width = 1400.0f;
+		float       m_Height = 900.0f;
+
+		// Perspective
+		float		m_Fov = PI / 4.0f;
+		float		m_Aspect = 1.0f;
 	};
+
 }

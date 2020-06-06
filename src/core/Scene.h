@@ -36,17 +36,31 @@ namespace GLSLPT
 		~Scene();
 
 		void AddCamera(Vector3 eye, Vector3 lookat, float fov);
+
 		int AddMesh(const std::string& filename);
+
 		int AddMesh(Mesh* mesh);
+
 		int AddTexture(const std::string& filename);
+
 		int AddTexture(const std::string& filename, unsigned char* data, int width, int height, int comp);
+
 		int AddMaterial(const Material& material);
+
 		int AddMeshInstance(const MeshInstance& meshInstance);
+
 		int AddLight(const Light& light);
+
 		void AddHDR(const std::string& filename);
+
 		void CreateAccelerationStructures();
+
 		void RebuildInstancesData();
 
+		void Resize(int width, int height);
+
+		void Update(float deltaTime);
+		
 	private:
 		void CreateBLAS();
 		void CreateTLAS();
@@ -54,39 +68,39 @@ namespace GLSLPT
 		
 	public:
 		// Options
-		RenderOptions renderOptions;
+		RenderOptions				renderOptions;
 		// Mesh Data
-		std::vector<Mesh*> meshes;
+		std::vector<Mesh*>			meshes;
 		// Instance Data
-		std::vector<Material> materials;
-		std::vector<MeshInstance> meshInstances;
+		std::vector<Material>		materials;
+		std::vector<MeshInstance>	meshInstances;
 		// Lights
-		std::vector<Light> lights;
+		std::vector<Light>			lights;
 		// HDR
-		HDRData* hdrData;
+		HDRData*					hdrData;
 		// Camera
-		Camera* camera;
+		Camera*						camera;
 		// Scene Mesh Data 
-		std::vector<Indices> vertIndices;
-		std::vector<Vector4> verticesUVX;
-		std::vector<Vector4> normalsUVY;
-		std::vector<Matrix4x4> transforms;
+		std::vector<Indices>		vertIndices;
+		std::vector<Vector4>		verticesUVX;
+		std::vector<Vector4>		normalsUVY;
+		std::vector<Matrix4x4>		transforms;
 		// texture size
-		int indicesTexWidth;
-		int triDataTexWidth;
+		int							indicesTexWidth;
+		int							triDataTexWidth;
 		// Bvh
-		RadeonRays::BvhTranslator bvhTranslator;
+		RadeonRays::BvhTranslator	bvhTranslator;
 		// Texture Data
-		std::vector<Texture*> textures;
-		std::vector<uint8> textureMapsArray;
-		int texWidth;
-		int texHeight;
-		Bounds3D sceneBounds;
-		bool instancesModified = false;
+		std::vector<Texture*>		textures;
+		std::vector<uint8>			textureMapsArray;
+		int							texWidth;
+		int							texHeight;
+		Bounds3D					sceneBounds;
+		bool						instancesModified = false;
 		// thread pool
-		TaskThreadPool* taskPool = nullptr;
+		TaskThreadPool*				taskPool = nullptr;
 
 	private:
-		RadeonRays::Bvh* sceneBvh;
+		RadeonRays::Bvh*			sceneBvh;
 	};
 }

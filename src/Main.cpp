@@ -22,20 +22,22 @@
 
 using namespace GLSLPT;
 
-float mouseSensitivity = 1.0f;
-int sampleSceneIndex = -1;
-int selectedInstance = 0;
-double lastTime = 0;
+float			mouseSensitivity = 1.0f;
+int				sampleSceneIndex = -1;
+int				selectedInstance = 0;
+double			lastTime = 0;
 
-Scene* scene = nullptr;
-Renderer* renderer = nullptr;
-GLFWwindow* glfwWindow = NULL;
-RenderOptions renderOptions;
+Scene*			scene = nullptr;
+Renderer*		renderer = nullptr;
+GLFWwindow*		glfwWindow = NULL;
+RenderOptions	renderOptions;
 
 void LoadSampleScene(int index)
 {
 	std::string path(EMBED_RES_PATH);
-	if (scene) {
+
+	if (scene) 
+	{
 		delete scene;
 		scene = nullptr;
 	}
@@ -64,7 +66,8 @@ bool InitRenderer()
 {
 	std::string path(EMBED_RES_PATH);
 
-	if (renderer) {
+	if (renderer) 
+	{
 		delete renderer;
 		renderer = nullptr;
 	}
@@ -94,81 +97,95 @@ void Update(float deltaTime)
 {
 	ImGuiIO& io = ImGui::GetIO();
 
-	if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) && (ImGui::IsMouseDown(2) || ImGui::IsMouseDown(1)) && !ImGuizmo::IsOver())
+	ImVec2 mousePos = ImGui::GetMousePos();
+	scene->camera->OnMousePos(Vector2(mousePos.x, mousePos.y));
+
+	if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) &&
+		(ImGui::IsMouseDown(GLFW_MOUSE_BUTTON_RIGHT) || ImGui::IsMouseDown(GLFW_MOUSE_BUTTON_MIDDLE) || ImGui::GetIO().MouseWheel != 0.0f) && 
+		!ImGuizmo::IsOver()
+	)
 	{
-		if (ImGui::IsMouseDown(2) && !io.KeyShift)
-		{
-			ImVec2 mouseDelta = ImGui::GetMouseDragDelta(2, 0);
-			scene->camera->OffsetOrientation(mouseSensitivity * mouseDelta.x, mouseSensitivity * mouseDelta.y);
-			ImGui::ResetMouseDragDelta(2);
-		}
-		else if (ImGui::IsMouseDown(2))
-		{
-			ImVec2 mouseDelta = ImGui::GetMouseDragDelta(2, 0);
-			scene->camera->Strafe(0.01 * mouseDelta.x, 0.01 * mouseDelta.y);
-			ImGui::ResetMouseDragDelta(2);
-		}
-		else if (ImGui::IsMouseDown(1))
-		{
-			ImVec2 mouseDelta = ImGui::GetMouseDragDelta(1, 0);
-			scene->camera->ChangeRadius(mouseSensitivity * 0.01 * mouseDelta.y);
-			ImGui::ResetMouseDragDelta(1);
-		}
-		scene->camera->isMoving = true;
+		scene->camera->OnRMouse(ImGui::IsMouseDown(GLFW_MOUSE_BUTTON_RIGHT));
+		scene->camera->OnMMouse(ImGui::IsMouseDown(GLFW_MOUSE_BUTTON_MIDDLE));
+		scene->camera->OnMouseWheel(ImGui::GetIO().MouseWheel);
+	}
+	else
+	{
+		scene->camera->OnRMouse(false);
+		scene->camera->OnMMouse(false);
+		scene->camera->OnMouseWheel(0.0f);
 	}
 
+	scene->Update(deltaTime);
 	renderer->Update(deltaTime);
 }
 
-void EditTransform(const float* view, const float* projection, float* matrix)
+void EditTransform(const float* view, const float* proj, Matrix4x4& matrix)
 {
 	static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
 	static ImGuizmo::MODE      mCurrentGizmoMode(ImGuizmo::WORLD);
 
-	if (ImGui::IsKeyPressed(90)) {
+	if (ImGui::IsKeyPressed(GLFW_KEY_W)) 
+	{
 		mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 	}
-	if (ImGui::IsKeyPressed(69)) {
+
+	if (ImGui::IsKeyPressed(GLFW_KEY_E)) 
+	{
 		mCurrentGizmoOperation = ImGuizmo::ROTATE;
 	}
-	if (ImGui::IsKeyPressed(82)) {
-		mCurrentGizmoOperation = ImGuizmo::SCALE;
-	}
-	if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE)) {
-		mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-	}
-	ImGui::SameLine();
-	if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE)) {
-		mCurrentGizmoOperation = ImGuizmo::ROTATE;
-	}
-	ImGui::SameLine();
-	if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE)) {
+
+	if (ImGui::IsKeyPressed(GLFW_KEY_R)) 
+	{
 		mCurrentGizmoOperation = ImGuizmo::SCALE;
 	}
 
-	float matrixTranslation[3];
-	float matrixRotation[3];
-	float matrixScale[3];
-	ImGuizmo::DecomposeMatrixToComponents(matrix, matrixTranslation, matrixRotation, matrixScale);
-	ImGui::InputFloat3("Tr", matrixTranslation);
-	ImGui::InputFloat3("Rt", matrixRotation);
-	ImGui::InputFloat3("Sc", matrixScale);
-	ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, matrix);
+	if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE)) 
+	{
+		mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+	}
+
+	ImGui::SameLine();
+	if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE)) 
+	{
+		mCurrentGizmoOperation = ImGuizmo::ROTATE;
+	}
+
+	ImGui::SameLine();
+	if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE)) 
+	{
+		mCurrentGizmoOperation = ImGuizmo::SCALE;
+	}
+
+	Vector3 pos = matrix.GetOrigin();
+	Vector3 rot = matrix.GetRotation();
+	Vector3 sca = matrix.GetScale();
+
+	ImGui::InputFloat3("Tr", (float*)&pos);
+	ImGui::InputFloat3("Rt", (float*)&rot);
+	ImGui::InputFloat3("Sc", (float*)&sca);
+
+	matrix.SetPosition(pos);
+	matrix.SetRotation(rot);
+	matrix.SetScale(sca);
 
 	if (mCurrentGizmoOperation != ImGuizmo::SCALE)
 	{
-		if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL)) {
+		if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL)) 
+		{
 			mCurrentGizmoMode = ImGuizmo::LOCAL;
 		}
+
 		ImGui::SameLine();
-		if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD)) {
+		if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD)) 
+		{
 			mCurrentGizmoMode = ImGuizmo::WORLD;
 		}
 	}
 	
 	ImGuiIO& io = ImGui::GetIO();
 	ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-	ImGuizmo::Manipulate(view, projection, mCurrentGizmoOperation, mCurrentGizmoMode, matrix, NULL, NULL);
+	ImGuizmo::Manipulate(view, proj, mCurrentGizmoOperation, mCurrentGizmoMode, (float*)&matrix, NULL, NULL);
 }
 
 void OnGUI(float deltaTime)
@@ -180,12 +197,7 @@ void OnGUI(float deltaTime)
 	ImGuizmo::BeginFrame();
 
 	ImGui::Begin("Settings");
-
 	ImGui::Text("Samples: %d ", renderer->GetSampleCount());
-
-	ImGui::BulletText("RMB + drag to zoom in/out");
-	ImGui::BulletText("MMB + drag to rotate");
-	ImGui::BulletText("SHIFT + MMB + drag to pan");
 
 	if (ImGui::Combo("Scene", &sampleSceneIndex, "Hyperion\0Cornell Box\0Boy\0"))
 	{
@@ -203,19 +215,16 @@ void OnGUI(float deltaTime)
 
 	if (ImGui::CollapsingHeader("Camera"))
 	{
-        float fov = MMath::RadiansToDegrees(scene->camera->fov);
-		float aperture = scene->camera->aperture * 1000.0f;
-
+        float fov = MMath::RadiansToDegrees(scene->camera->GetFov());
 		optionsChanged |= ImGui::SliderFloat("Fov", &fov, 10, 90);
-		scene->camera->SetFov(fov);
+		scene->camera->SetFov(MMath::DegreesToRadians(fov));
 
-		optionsChanged |= ImGui::SliderFloat("Aperture", &aperture, 0.0f, 10.8f);
+		float aperture = scene->camera->aperture * 1000.0f;
+		optionsChanged |= ImGui::SliderFloat("Aperture", &aperture, 0.0f, 50.0f);
 		scene->camera->aperture = aperture / 1000.0f;
 
-		optionsChanged |= ImGui::SliderFloat("Focal Distance", &scene->camera->focalDist, 0.01, 50.0);
+		optionsChanged |= ImGui::SliderFloat("Focal Distance", &scene->camera->focalDist, 0.01f, 50.0f);
 	}
-
-	scene->camera->isMoving = false;
 
 	if (optionsChanged)
 	{
@@ -228,7 +237,8 @@ void OnGUI(float deltaTime)
 		bool objectPropChanged = false;
 
 		std::vector<std::string> listboxItems;
-		for (int i = 0; i < scene->meshInstances.size(); i++) {
+		for (int i = 0; i < scene->meshInstances.size(); i++) 
+		{
 			listboxItems.push_back(scene->meshInstances[i].name);
 		}
 		
@@ -236,7 +246,8 @@ void OnGUI(float deltaTime)
 		for (int i = 0; i < scene->meshInstances.size(); i++)
 		{
 			bool isSelected = selectedInstance == i;
-			if (ImGui::Selectable(listboxItems[i].c_str(), isSelected)) {
+			if (ImGui::Selectable(listboxItems[i].c_str(), isSelected)) 
+			{
 				selectedInstance = i;
 			}
 		}
@@ -256,23 +267,23 @@ void OnGUI(float deltaTime)
 		ImGui::Separator();
 		ImGui::Text("Transforms");
 		{
-			float viewMatrix[16];
-			float projectionMatrix[16];
-			auto io = ImGui::GetIO();
-			
-			scene->camera->ComputeViewProjectionMatrix(viewMatrix, projectionMatrix, io.DisplaySize.x / io.DisplaySize.y);
-			Matrix4x4 tmpMat = scene->meshInstances[selectedInstance].transform;
+			Matrix4x4 trans = scene->meshInstances[selectedInstance].transform;
 
-			EditTransform(viewMatrix, projectionMatrix, (float*)&tmpMat.m);
+			float gizmoProj[16];
+			float gizmoView[16];
+			scene->camera->GetGizmoViewProjection(gizmoView, gizmoProj);
 
-			if (memcmp(&tmpMat, &scene->meshInstances[selectedInstance].transform, sizeof(float) * 16))
+			EditTransform(gizmoView, gizmoProj, trans);
+
+			if (memcmp(&trans, &scene->meshInstances[selectedInstance].transform, sizeof(float) * 16))
 			{
-				scene->meshInstances[selectedInstance].transform = tmpMat;
+				scene->meshInstances[selectedInstance].transform = trans;
 				objectPropChanged = true;
 			}
 		}
 
-		if (objectPropChanged) {
+		if (objectPropChanged) 
+		{
 			scene->RebuildInstancesData();
 		}
 	}
@@ -287,11 +298,9 @@ void MainLoop()
 	double currTime = glfwGetTime();
 	double passTime = currTime - lastTime;
 	lastTime = currTime;
-
+	
 	OnGUI((float)passTime);
-
 	Update((float)passTime);
-
 	Render((float)passTime);
 
 	glfwMakeContextCurrent(glfwWindow);
@@ -305,7 +314,7 @@ static void OnGLFWErrorCallback(int error, const char* description)
 
 static void OnGLFWResizeCallback(GLFWwindow* glfwWindow, int width, int height)
 {
-	glViewport(0, 0, width, height);
+	scene->Resize(width, height);
 }
 
 void Usage() 
@@ -364,8 +373,6 @@ bool InitIMGUI()
 	ImGui::CreateContext();
 
 	ImGuiIO& io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
 	ImGui::StyleColorsDark();
 

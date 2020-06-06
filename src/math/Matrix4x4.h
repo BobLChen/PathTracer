@@ -153,7 +153,7 @@ public:
 
 	inline void ScaleZ(float scale);
 
-	inline void SetScale(const Vector3& scale, float smooth);
+	inline void SetScale(const Vector3& scale, float smooth = 1.0f);
 
 	inline Matrix4x4 RemoveTranslation() const;
 
