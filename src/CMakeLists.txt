@@ -92,6 +92,13 @@ set(JOB_SRCS
     job/ThreadManager.cpp
 )
 
+set(FILE_HDRS
+    file/tinydir.h
+)
+set(FILE_SRCS
+    
+)
+
 add_library(Core STATIC
 	${BVH_HDRS}
 	${BVH_SRCS}
@@ -110,8 +117,12 @@ add_library(Core STATIC
 
     ${JOB_HDRS}
     ${JOB_SRCS}
+
+    ${FILE_HDRS}
+    ${FILE_SRCS}
 )
 
+source_group(src\\file FILES ${FILE_HDRS} ${FILE_SRCS})
 source_group(src\\job FILES ${JOB_HDRS} ${JOB_SRCS})
 source_group(src\\test FILES ${TEST_HDRS} ${TEST_SRCS})
 source_group(src\\math FILES ${MATH_SRCS} ${MATH_HDRS})

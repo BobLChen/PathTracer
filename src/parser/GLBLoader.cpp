@@ -418,8 +418,6 @@ namespace GLSLPT
 		Vector3 at     = center;
 		scene->AddCamera(eye, at, 60.0f);
 
-		scene->AddHDR(std::string(EMBED_RES_PATH) + "assets/HDR/photo_studio_01_1k.hdr");
-
 		scene->CreateAccelerationStructures();
 
 		return true;

@@ -20,58 +20,58 @@
 #include "test/BoyTestScene.h"
 #include "test/CornellTestScene.h"
 
+#include "file/tinydir.h"
+
 using namespace GLSLPT;
 
 int				sampleSceneIndex = -1;
 int				selectedInstance = 0;
 double			lastTime = 0;
+std::string		shaderDir;
+std::string		assetsDir;
 
 Scene*			scene = nullptr;
 Renderer*		renderer = nullptr;
 GLFWwindow*		glfwWindow = NULL;
 RenderOptions	renderOptions;
 
-void LoadSampleScene(int index)
-{
-	std::string path(EMBED_RES_PATH);
+std::vector<std::string> sceneFiles;
+std::vector<std::string> sceneNames;
 
+void LoadScene(const std::string& file)
+{
 	if (scene) 
 	{
 		delete scene;
 		scene = nullptr;
 	}
 	scene = new Scene();
+	
+	std::string ext = file.substr(file.find_last_of(".") + 1);
 
-    /*switch (index)
-    {
-	case 0:
-		LoadSceneFromFile(path + "assets/hyperion.scene", scene, renderOptions);
-		break;
-	case 1:
-		LoadSceneFromFile(path + "assets/cornell_box.scene", scene, renderOptions);
-		break;
-	case 2:
-		LoadBoyTestScene(path, scene, renderOptions);
-		break;
-    }*/
+	if (ext == "glb")
+	{
+		scene->AddHDR(assetsDir + "HDR/photo_studio_01_1k.hdr");
 
-	LoadSceneFromGLTF(path + "assets/diorama.glb", scene, renderOptions);
+		LoadSceneFromGLTF(file.c_str(), scene, renderOptions);
+	}
+	else if (ext == "scene")
+	{
+		LoadSceneFromFile(file.c_str(), scene, renderOptions);
+	}
 
-	selectedInstance = 0;
-    scene->renderOptions = renderOptions;
+	scene->renderOptions = renderOptions;
 }
 
 bool InitRenderer()
 {
-	std::string path(EMBED_RES_PATH);
-
 	if (renderer) 
 	{
 		delete renderer;
 		renderer = nullptr;
 	}
     
-    renderer = new TiledRenderer(scene, path + "shaders/");
+    renderer = new TiledRenderer(scene, shaderDir);
     renderer->Init();
     
     return true;
@@ -198,9 +198,14 @@ void OnGUI(float deltaTime)
 	ImGui::Begin("Settings");
 	ImGui::Text("Samples: %d ", renderer->GetSampleCount());
 
-	if (ImGui::Combo("Scene", &sampleSceneIndex, "Hyperion\0Cornell Box\0Boy\0"))
+	std::vector<const char*> sceneItems;
+	for (int i = 0; i < sceneNames.size(); ++i) {
+		sceneItems.push_back(sceneNames[i].c_str());
+	}
+
+	if (ImGui::Combo("Scene", &sampleSceneIndex, sceneItems.data(), sceneItems.size()))
 	{
-		LoadSampleScene(sampleSceneIndex);
+		LoadScene(sceneFiles[sampleSceneIndex]);
 		InitRenderer();
 	}
 
@@ -398,44 +403,51 @@ bool Cleanup()
 	return true;
 }
 
-std::string GetSceneFile(int argc, char** argv)
+bool InitScene()
 {
-	std::string filename;
+	sampleSceneIndex = 0;
+	LoadScene(sceneFiles[sampleSceneIndex]);
 
-	const int argc_check = argc - 1;
-
-	for (int i = 1; i < argc; ++i) 
-	{
-		if (!strcmp("-h", argv[i]) || !strcmp("-?", argv[i])) 
-		{
-			Usage();
-			exit(0);
-			return filename;
-		}
-		else if (!strcmp("-i", argv[i]) && i < argc_check) 
-		{
-			filename = argv[++i];
-		}
-	}
-
-	return filename;
+	return true;
 }
 
-bool InitScene(const std::string& scenefile)
+void GetDirFiles(const std::string& path, std::vector<std::string>& files)
 {
-	if (scenefile.empty())
+	tinydir_dir dir;
+	tinydir_open(&dir, path.c_str());
+
+	while (dir.has_next)
 	{
-		sampleSceneIndex = 0;
-		LoadSampleScene(sampleSceneIndex);
-	}
-	else
-	{
-		scene = new Scene();
-		if (!LoadSceneFromFile(scenefile, scene, renderOptions)) {
-			return 1;
+		tinydir_file file;
+		tinydir_readfile(&dir, &file);
+
+		if (file.is_dir)
+		{
+			// 
 		}
-		scene->renderOptions = renderOptions;
-		printf("Scene %s Loaded\n", scenefile.c_str());
+		else
+		{
+			files.push_back(file.path);
+		}
+
+		tinydir_next(&dir);
+	}
+
+	tinydir_close(&dir);
+}
+
+bool InitSceneFiles()
+{
+	std::vector<std::string> files;
+	GetDirFiles(assetsDir, files);
+
+	for (int i = 0; i < files.size(); ++i)
+	{
+		std::string& file = files[i];
+		std::string name  = file.substr(file.find_last_of("/\\") + 1);
+
+		sceneFiles.push_back(file);
+		sceneNames.push_back(name);
 	}
 
 	return true;
@@ -443,7 +455,22 @@ bool InitScene(const std::string& scenefile)
 
 int main(int argc, char** argv)
 {
-	if (!InitScene(GetSceneFile(argc, argv))) {
+	std::string exePath = argv[0];
+	std::string dirPath = exePath.substr(0, exePath.find_last_of("/\\")) + "/";
+	for (int i = 0; i < dirPath.size(); ++i) {
+		if (dirPath[i] == '\\') {
+			dirPath[i] = '/';
+		}
+	}
+
+	assetsDir = dirPath + "assets/";
+	shaderDir = dirPath + "shaders/";
+
+	if (!InitSceneFiles()) {
+		return 1;
+	}
+
+	if (!InitScene()) {
 		return 1;
 	}
     
