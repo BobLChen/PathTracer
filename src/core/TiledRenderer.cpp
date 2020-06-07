@@ -180,31 +180,41 @@ namespace GLSLPT
 		}
 
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, bvhTex);
+        bvhTex->Active();
 		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, aabbMinTex);
+        aabbMinTex->Active();
 		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, aabbMaxTex);
+        aabbMaxTex->Active();
 		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_2D, vertexIndicesTex);
+        vertexIndicesTex->Active();
 		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_2D, verticesTex);
+        verticesTex->Active();
 		glActiveTexture(GL_TEXTURE6);
-		glBindTexture(GL_TEXTURE_2D, normalsTex);
+        normalsTex->Active();
 		glActiveTexture(GL_TEXTURE7);
-		glBindTexture(GL_TEXTURE_2D, materialsTex);
+        materialsTex->Active();
 		glActiveTexture(GL_TEXTURE8);
-		glBindTexture(GL_TEXTURE_2D, transformsTex);
+        transformsTex->Active();
 		glActiveTexture(GL_TEXTURE9);
-		glBindTexture(GL_TEXTURE_2D, lightsTex);
+        if (lightsTex) {
+            lightsTex->Active();
+        }
 		glActiveTexture(GL_TEXTURE10);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, textureMapsArrayTex);
+        if (textureMapsArrayTex) {
+            textureMapsArrayTex->Active();
+        }
 		glActiveTexture(GL_TEXTURE11);
-		glBindTexture(GL_TEXTURE_2D, hdrTex);
+        if (hdrTex) {
+            hdrTex->Active();
+        }
 		glActiveTexture(GL_TEXTURE12);
-		glBindTexture(GL_TEXTURE_2D, hdrMarginalDistTex);
+        if (hdrMarginalDistTex) {
+            hdrMarginalDistTex->Active();
+        }
 		glActiveTexture(GL_TEXTURE13);
-		glBindTexture(GL_TEXTURE_2D, hdrConditionalDistTex);
+        if (hdrConditionalDistTex) {
+            hdrConditionalDistTex->Active();
+        }
     }
 
     void TiledRenderer::Dispose()

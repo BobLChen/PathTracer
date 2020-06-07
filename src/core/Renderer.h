@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "math/Vector2.h"
+#include "gfx/GfxTexture.h"
 
 #include "Quad.h"
 #include "Program.h"
@@ -55,20 +56,20 @@ namespace GLSLPT
         virtual int GetSampleCount() const = 0;
 
 	protected:
-		GLuint bvhTex;
-		GLuint aabbMinTex;
-		GLuint aabbMaxTex;
-		GLuint vertexIndicesTex;
-		GLuint verticesTex;
-		GLuint normalsTex;
-		GLuint materialsTex;
-		GLuint transformsTex;
-		GLuint lightsTex;
-		GLuint textureMapsArrayTex;
-		GLuint hdrTex;
-		GLuint hdrMarginalDistTex;
-		GLuint hdrConditionalDistTex;
-
+		GfxTexture* bvhTex = nullptr;
+		GfxTexture* aabbMinTex = nullptr;
+		GfxTexture* aabbMaxTex = nullptr;
+		GfxTexture* vertexIndicesTex = nullptr;
+		GfxTexture* verticesTex = nullptr;
+		GfxTexture* normalsTex = nullptr;
+		GfxTexture* materialsTex = nullptr;
+		GfxTexture* transformsTex = nullptr;
+		GfxTexture* lightsTex = nullptr;
+		GfxTexture* textureMapsArrayTex = nullptr;
+		GfxTexture* hdrTex = nullptr;
+		GfxTexture* hdrMarginalDistTex = nullptr;
+		GfxTexture* hdrConditionalDistTex = nullptr;
+        
 		bool initialized;
 
 		Scene* scene;

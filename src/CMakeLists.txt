@@ -99,6 +99,15 @@ set(FILE_SRCS
     
 )
 
+set(GFX_HDRS
+    gfx/GfxShader.h
+    gfx/GfxTexture.h
+)
+set(GFX_SRCS
+    gfx/GfxShader.cpp
+    gfx/GfxTexture.cpp
+)
+
 add_library(Core STATIC
 	${BVH_HDRS}
 	${BVH_SRCS}
@@ -120,8 +129,12 @@ add_library(Core STATIC
 
     ${FILE_HDRS}
     ${FILE_SRCS}
+
+    ${GFX_HDRS}
+    ${GFX_SRCS}
 )
 
+source_group(src\\gfx FILES ${GFX_SRCS} ${GFX_HDRS})
 source_group(src\\file FILES ${FILE_HDRS} ${FILE_SRCS})
 source_group(src\\job FILES ${JOB_HDRS} ${JOB_SRCS})
 source_group(src\\test FILES ${TEST_HDRS} ${TEST_SRCS})
