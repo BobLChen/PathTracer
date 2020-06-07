@@ -204,9 +204,9 @@ namespace GLSLPT
 			{
 
 			}
-
-			bool done;
+            
 			Texture* texture;
+            bool done;
 		};
 
 		printf("Loading assets ...\n");
@@ -329,8 +329,8 @@ namespace GLSLPT
 
 			}
 
+            Mesh* mesh;
 			bool done;
-			Mesh* mesh;
 		};
 
 		printf("Building bottom level bvh...\n");
@@ -358,14 +358,17 @@ namespace GLSLPT
 
 	void Scene::Update(float deltaTime)
 	{
-		camera->Perspective(camera->GetFov(), renderOptions.resolution.x, renderOptions.resolution.y, camera->GetNear(), camera->GetFar());
+		camera->Perspective(camera->GetFov(), renderOptions.frameSize.x, renderOptions.frameSize.y, camera->GetNear(), camera->GetFar());
 		camera->Update(deltaTime);
 	}
 	
-	void Scene::Resize(int width, int height)
+	void Scene::Resize(int wWidth, int wHeight, int fWidth, int fHeight)
 	{
-		renderOptions.resolution.x = width;
-		renderOptions.resolution.y = height;
+		renderOptions.windowSize.x = wWidth;
+		renderOptions.windowSize.y = wHeight;
+        
+        renderOptions.frameSize.x  = fWidth;
+        renderOptions.frameSize.y  = fHeight;
 	}
 	
 	void Scene::RebuildInstancesData()

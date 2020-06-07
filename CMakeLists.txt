@@ -68,24 +68,12 @@ add_executable(PathTracer
 )
 target_link_libraries(PathTracer ${ALL_LIBS})
 
-set(EXE_BINARY_PATH
-	${CMAKE_CURRENT_BINARY_DIR}/Debug/
-)
-if (WIN32)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DPLATFORM_WINDOWS=1")
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-elseif (APPLE)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DPLATFORM_MAC=1")
-	SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Cocoa -framework QuartzCore")
-	set(CMAKE_XCODE_GENERATE_SCHEME ON)
-	set(XCODE_SCHEME_ENVIRONMENT ON)
-elseif (UNIX)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DPLATFORM_LINUX=1")
-endif ()
-
-add_custom_target(TARGET PathTracer 
-	POST_BUILD 
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets ${EXE_BINARY_PATH}/assets
+add_custom_command(TARGET PathTracer POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+	${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:PathTracer>/assets/
 )
 
-message(${EXE_BINARY_PATH})
+add_custom_command(TARGET PathTracer POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+	${CMAKE_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:PathTracer>/shaders/
+)

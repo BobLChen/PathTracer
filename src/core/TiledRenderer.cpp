@@ -32,14 +32,16 @@ namespace GLSLPT
 
 		sampleCounter = 1;
 		currentBuffer = 0;
-		totalTime = 0;
+		totalTime     = 0;
+        
+        Vector2 frameSize = scene->renderOptions.frameSize;
+        
+		tileWidth  = (int)frameSize.x / numTilesX;
+		tileHeight = (int)frameSize.y / numTilesY;
+		tileX      = -1;
+		tileY      = numTilesY - 1;
 
-		tileWidth = (int)screenSize.x / numTilesX;
-		tileHeight = (int)screenSize.y / numTilesY;
-		tileX = -1;
-		tileY = numTilesY - 1;
-
-		printf("Debug sizes : %d %d - %f %f\n", tileWidth, tileHeight, screenSize.x, screenSize.y);
+		printf("Debug sizes : %d %d - %f %f\n", tileWidth, tileHeight, frameSize.x, frameSize.y);
 
         //----------------------------------------------------------
         // Shaders
@@ -75,7 +77,7 @@ namespace GLSLPT
 		// Create Texture for FBO
 		glGenTextures(1, &pathTraceTextureLowRes);
 		glBindTexture(GL_TEXTURE_2D, pathTraceTextureLowRes);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, screenSize.x / 4, screenSize.y / 4, 0, GL_RGBA, GL_FLOAT, 0);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, frameSize.x / 4, frameSize.y / 4, 0, GL_RGBA, GL_FLOAT, 0);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -91,7 +93,7 @@ namespace GLSLPT
 		// Create Texture for FBO
 		glGenTextures(1, &accumTexture);
 		glBindTexture(GL_TEXTURE_2D, accumTexture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, screenSize.x, screenSize.y, 0, GL_RGBA, GL_FLOAT, 0);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, frameSize.x, frameSize.y, 0, GL_RGBA, GL_FLOAT, 0);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -105,14 +107,14 @@ namespace GLSLPT
 		// Create Texture for FBO
 		glGenTextures(1, &tileOutputTexture[0]);
 		glBindTexture(GL_TEXTURE_2D, tileOutputTexture[0]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, screenSize.x, screenSize.y, 0, GL_RGBA, GL_FLOAT, 0);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, frameSize.x, frameSize.y, 0, GL_RGBA, GL_FLOAT, 0);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		glGenTextures(1, &tileOutputTexture[1]);
 		glBindTexture(GL_TEXTURE_2D, tileOutputTexture[1]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, screenSize.x, screenSize.y, 0, GL_RGBA, GL_FLOAT, 0);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, frameSize.x, frameSize.y, 0, GL_RGBA, GL_FLOAT, 0);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -128,7 +130,7 @@ namespace GLSLPT
 			glUniform1f(glGetUniformLocation(shaderObject, "hdrResolution"), scene->hdrData == nullptr ? 0 : float(scene->hdrData->width * scene->hdrData->height));
 			glUniform1i(glGetUniformLocation(shaderObject, "topBVHIndex"), scene->bvhTranslator.topLevelIndexPackedXY);
 			glUniform1i(glGetUniformLocation(shaderObject, "vertIndicesSize"), scene->indicesTexWidth);
-			glUniform2f(glGetUniformLocation(shaderObject, "screenResolution"), float(screenSize.x), float(screenSize.y));
+			glUniform2f(glGetUniformLocation(shaderObject, "screenResolution"), frameSize.x, frameSize.y);
 			glUniform1i(glGetUniformLocation(shaderObject, "numOfLights"), numOfLights);
 			glUniform1f(glGetUniformLocation(shaderObject, "invTileWidth"), 1.0f / numTilesX);
 			glUniform1f(glGetUniformLocation(shaderObject, "invTileHeight"), 1.0f / numTilesY);
@@ -157,7 +159,7 @@ namespace GLSLPT
 			glUniform1f(glGetUniformLocation(shaderObject, "hdrResolution"), scene->hdrData == nullptr ? 0 : float(scene->hdrData->width * scene->hdrData->height));
 			glUniform1i(glGetUniformLocation(shaderObject, "topBVHIndex"), scene->bvhTranslator.topLevelIndexPackedXY);
 			glUniform1i(glGetUniformLocation(shaderObject, "vertIndicesSize"), scene->indicesTexWidth);
-			glUniform2f(glGetUniformLocation(shaderObject, "screenResolution"), float(screenSize.x), float(screenSize.y));
+			glUniform2f(glGetUniformLocation(shaderObject, "screenResolution"), frameSize.x, frameSize.y);
 			glUniform1i(glGetUniformLocation(shaderObject, "numOfLights"), numOfLights);
 			glUniform1i(glGetUniformLocation(shaderObject, "accumTexture"), 0);
 			glUniform1i(glGetUniformLocation(shaderObject, "BVH"), 1);
@@ -237,7 +239,9 @@ namespace GLSLPT
             printf("Tiled Renderer is not initialized\n");
             return;
         }
-
+        
+        Vector2 frameSize = scene->renderOptions.frameSize;
+        
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, accumTexture);
 
@@ -255,13 +259,13 @@ namespace GLSLPT
 
 			glBindFramebuffer(GL_FRAMEBUFFER, outputFBO);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tileOutputTexture[currentBuffer], 0);
-			glViewport(0, 0, screenSize.x, screenSize.y);
+			glViewport(0, 0, frameSize.x, frameSize.y);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, accumTexture);
 			quad->Draw(tileOutputShader);
-
+            
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glViewport(0, 0, screenSize.x, screenSize.y);
+			glViewport(0, 0, frameSize.x, frameSize.y);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, tileOutputTexture[1 - currentBuffer]);
 			quad->Draw(outputShader);
@@ -269,12 +273,12 @@ namespace GLSLPT
 		else
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, pathTraceFBOLowRes);
-			glViewport(0, 0, screenSize.x / 4, screenSize.y / 4);
+			glViewport(0, 0, frameSize.x / 4, frameSize.y / 4);
 			quad->Draw(pathTraceShaderLowRes);
 			scene->instancesModified = false;
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glViewport(0, 0, screenSize.x, screenSize.y);
+			glViewport(0, 0, frameSize.x, frameSize.y);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, pathTraceTextureLowRes);
 			quad->Draw(outputShader);
@@ -301,6 +305,8 @@ namespace GLSLPT
 		float r2;
 		float r3;
 		
+        Vector2 frameSize = scene->renderOptions.frameSize;
+        
 		if (scene->camera->isMoving || scene->instancesModified)
 		{
 			r1 = r2 = r3 = 0;
@@ -309,12 +315,12 @@ namespace GLSLPT
 			sampleCounter = 1;
 
 			glBindFramebuffer(GL_FRAMEBUFFER, accumFBO);
-			glViewport(0, 0, screenSize.x, screenSize.y);
+			glViewport(0, 0, frameSize.x, frameSize.y);
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, outputFBO);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tileOutputTexture[1 - currentBuffer], 0);
-			glViewport(0, 0, screenSize.x, screenSize.y);
+			glViewport(0, 0, frameSize.x, frameSize.y);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, pathTraceTextureLowRes);
 			quad->Draw(accumShader);

@@ -63,8 +63,7 @@ namespace GLSLPT
         std::vector<std::string> albedoTex;
         std::vector<std::string> metallicRoughnessTex;
         std::vector<std::string> normalTex;
-
-        int materialCount = 0;
+        
         char line[s_MAX_LINE_LENGTH];
 
         // defaultMat
@@ -222,7 +221,7 @@ namespace GLSLPT
 					}
                     
                     sscanf(line, " envMap %s", envMap);
-                    sscanf(line, " resolution %f %f", &renderOptions.resolution.x, &renderOptions.resolution.y);
+                    sscanf(line, " resolution %f %f", &renderOptions.windowSize.x, &renderOptions.windowSize.y);
                     sscanf(line, " hdrMultiplier %f", &renderOptions.intensity);
                     sscanf(line, " maxDepth %i", &renderOptions.maxDepth);
                     sscanf(line, " numTilesX %i", &renderOptions.numTilesX);

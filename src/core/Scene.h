@@ -57,7 +57,7 @@ namespace GLSLPT
 
 		void RebuildInstancesData();
 
-		void Resize(int width, int height);
+		void Resize(int wWidth, int wHeight, int fWidth, int fHeight);
 
 		void Update(float deltaTime);
 		

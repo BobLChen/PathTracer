@@ -30,7 +30,6 @@ namespace GLSLPT
 		, hdrConditionalDistTex(0)
         , initialized(false)
         , scene(scene)
-        , screenSize(scene->renderOptions.resolution)
         , shadersDirectory(shadersDirectory)
     {
 

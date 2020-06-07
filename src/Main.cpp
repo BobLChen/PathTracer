@@ -94,8 +94,6 @@ void Render(float deltaTime)
 
 void Update(float deltaTime)
 {
-	ImGuiIO& io = ImGui::GetIO();
-
 	ImVec2 mousePos = ImGui::GetMousePos();
 	scene->camera->OnMousePos(Vector2(mousePos.x, mousePos.y));
 
@@ -318,9 +316,12 @@ static void OnGLFWErrorCallback(int error, const char* description)
 	printf("GLFW Error %d: %s\n", error, description);
 }
 
-static void OnGLFWResizeCallback(GLFWwindow* glfwWindow, int width, int height)
+static void OnGLFWResizeCallback(GLFWwindow* window, int width, int height)
 {
-	scene->Resize(width, height);
+    int fWidth  = 0;
+    int fHeight = 0;
+    glfwGetFramebufferSize(window, &fWidth, &fHeight);
+	scene->Resize(width, height, fWidth, fHeight);
 }
 
 void Usage() 
@@ -348,14 +349,19 @@ bool InitOpenGLResources()
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-	glfwWindow = glfwCreateWindow(renderOptions.resolution.x, renderOptions.resolution.y, "PathTracer", NULL, NULL);
+	glfwWindow = glfwCreateWindow(renderOptions.windowSize.x, renderOptions.windowSize.y, "PathTracer", NULL, NULL);
 	if (glfwWindow == NULL) {
 		return false;
 	}
 
 	glfwMakeContextCurrent(glfwWindow);
 	glfwSetFramebufferSizeCallback(glfwWindow, OnGLFWResizeCallback);
-
+    
+    int frameWidth;
+    int frameHeight;
+    glfwGetFramebufferSize(glfwWindow, &frameWidth, &frameHeight);
+    scene->renderOptions.frameSize = Vector2(frameWidth, frameHeight);
+    
 	if (!gladLoadGL())
 	{
 		printf("Failed to initialize OpenGL loader!\n");
@@ -378,7 +384,7 @@ bool InitIMGUI()
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 
-	ImGuiIO& io = ImGui::GetIO();
+	// ImGuiIO& io = ImGui::GetIO();
 
 	ImGui::StyleColorsDark();
 

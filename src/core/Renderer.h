@@ -21,11 +21,14 @@ namespace GLSLPT
             numTilesX  = 4;
             numTilesY  = 4;
             useEnvMap  = false;
-            resolution = Vector2(1280, 720);
+            windowSize = Vector2(1280, 720);
+            frameSize  = windowSize;
 			intensity  = 1.0f;
         }
 
-        Vector2 resolution;
+        Vector2 windowSize;
+        Vector2 frameSize;
+        
         int maxDepth;
         int numTilesX;
         int numTilesY;
@@ -41,12 +44,7 @@ namespace GLSLPT
         Renderer(Scene *scene, const std::string& shadersDirectory);
 
         virtual ~Renderer();
-
-        const Vector2 getScreenSize() const 
-		{ 
-			return screenSize; 
-		}
-
+        
         virtual void Init();
         virtual void Dispose();
 
@@ -76,7 +74,6 @@ namespace GLSLPT
 		Scene* scene;
 		Quad *quad;
 		int numOfLights;
-		Vector2 screenSize;
 		std::string shadersDirectory;
     };
 }

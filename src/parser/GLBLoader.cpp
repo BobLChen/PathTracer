@@ -1,4 +1,4 @@
-﻿#include <map>
+#include <map>
 
 #include "math/Matrix4x4.h"
 #include "math/Quat.h"
@@ -380,7 +380,7 @@ namespace GLSLPT
 				GLTFMesh& mesh = meshes[j];
 				if (mesh.mesh == node->meshID)
 				{
-					Matrix4x4& matrix = node->WorldMatrix();
+					Matrix4x4 matrix = node->WorldMatrix();
 
 					// add to instance
 					scene->AddMeshInstance(MeshInstance(mesh.meshID, matrix, mesh.materialID, node->name));

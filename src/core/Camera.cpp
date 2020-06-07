@@ -20,7 +20,7 @@ namespace GLSLPT
 
 	void Normalize(const float* a, float* r)
 	{
-		float il = 1.f / (sqrtf(Dot(a, a)) + FLT_EPSILON);
+		float il = 1.f / (sqrtf(Dot(a, a)) + 0.0001f);
 		r[0] = a[0] * il;
 		r[1] = a[1] * il;
 		r[2] = a[2] * il;
