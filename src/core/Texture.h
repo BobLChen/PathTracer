@@ -14,21 +14,17 @@ namespace GLSLPT
 			, height(-1)
 			, comp(3)
 			, loaded(false)
-			, texData(nullptr)
 		{
 
 		}
 
-		~Texture() 
-		{ 
-			if (texData)
-			{
-				delete texData;
-				texData = nullptr;
-			}
-		}
+		~Texture();
 
 		bool LoadTexture(const std::string& filename);
+
+		void SetChannel(int channel);
+
+		void Resize(int width, int height);
 		
 		int width;
 		int height;
@@ -37,6 +33,6 @@ namespace GLSLPT
 
 		bool loaded;
 
-		uint8* texData;
+		std::vector<uint8> texData;
 	};
 }

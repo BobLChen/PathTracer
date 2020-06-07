@@ -65,7 +65,8 @@ namespace GLSLPT
 		void CreateBLAS();
 		void CreateTLAS();
 		void LoadAssets();
-		
+		void ValidateTextures();
+
 	public:
 		// Options
 		RenderOptions				renderOptions;

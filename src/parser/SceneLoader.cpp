@@ -295,6 +295,8 @@ namespace GLSLPT
 			scene->AddCamera(Vector3(0.0f, 0.0f, 10.0f), Vector3(0.0f, 0.0f, -10.0f), 35.0f);
 		}
         
+		renderOptions.frameSize = renderOptions.windowSize;
+
         scene->CreateAccelerationStructures();
 
         return true;

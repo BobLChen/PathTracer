@@ -204,6 +204,7 @@ void OnGUI(float deltaTime)
 	if (ImGui::Combo("Scene", &sampleSceneIndex, sceneItems.data(), sceneItems.size()))
 	{
 		LoadScene(sceneFiles[sampleSceneIndex]);
+		glfwSetWindowSize(glfwWindow, scene->renderOptions.windowSize.x, scene->renderOptions.windowSize.y);
 		InitRenderer();
 	}
 

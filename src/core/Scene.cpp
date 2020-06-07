@@ -79,21 +79,18 @@ namespace GLSLPT
 
 	int Scene::AddTexture(const std::string& filename, unsigned char* data, int width, int height, int comp)
 	{
-		for (int i = 0; i < textures.size(); ++i)
-		{
-			if (textures[i]->name == filename) {
-				return i;
-			}
-		}
-
 		int id = textures.size();
+
 		Texture* texture = new Texture();
 		texture->name    = filename;
 		texture->width   = width;
 		texture->height  = height;
-		texture->texData = data;
 		texture->comp    = comp;
 		texture->loaded  = true;
+
+		texture->texData.resize(width * height * comp);
+		std::copy(data, data + width * height * comp, texture->texData.begin());
+		
 		textures.push_back(texture);
 
 		return id;
@@ -392,9 +389,36 @@ namespace GLSLPT
 		instancesModified = true;
 	}
 
+	void Scene::ValidateTextures()
+	{
+		if (textures.size() == 0) {
+			return;
+		}
+
+		int width  = textures[0]->width;
+		int height = textures[0]->height;
+
+		for (int i = 0; i < textures.size(); ++i)
+		{
+			if (textures[i]->comp != 3) 
+			{
+				textures[i]->SetChannel(3);
+			}
+			if (textures[i]->width != width || textures[i]->height != height) 
+			{
+				textures[i]->Resize(width, height);
+			}
+		}
+
+		texWidth  = width;
+		texHeight = height;
+	}
+
 	void Scene::CreateAccelerationStructures()
 	{
 		LoadAssets();
+
+		ValidateTextures();
 
 		CreateBLAS();
 
@@ -430,8 +454,8 @@ namespace GLSLPT
 		}
 
 		// Resize to power of 2
-		indicesTexWidth  = (int)(sqrt(vertIndices.size()) + 1); 
-		triDataTexWidth  = (int)(sqrt(verticesUVX.size())+ 1); 
+		indicesTexWidth = (int)(sqrt(vertIndices.size()) + 1); 
+		triDataTexWidth = (int)(sqrt(verticesUVX.size())+ 1); 
 
 		vertIndices.resize(indicesTexWidth * indicesTexWidth);
 		verticesUVX.resize(triDataTexWidth * triDataTexWidth);
@@ -446,17 +470,15 @@ namespace GLSLPT
 
 		// Copy transforms
 		transforms.resize(meshInstances.size());
-		for (int i = 0; i < meshInstances.size(); i++) {
+		for (int i = 0; i < meshInstances.size(); i++) 
+		{
 			transforms[i] = meshInstances[i].transform;
 		}
 		
 		// Copy Textures
 		for (int i = 0; i < textures.size(); i++)
 		{
-			texWidth = textures[i]->width;
-			texHeight = textures[i]->height;
-			int texSize = texWidth * texHeight;
-			textureMapsArray.insert(textureMapsArray.end(), &textures[i]->texData[0], &textures[i]->texData[texSize * 3]);
+			textureMapsArray.insert(textureMapsArray.end(), textures[i]->texData.begin(), textures[i]->texData.end());
 		}
 	}
 }

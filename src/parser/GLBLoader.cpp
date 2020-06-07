@@ -153,7 +153,7 @@ namespace GLSLPT
 		{
 			tinygltf::Texture& tex = gltfModel.textures[i];
 			tinygltf::Image& image = gltfModel.images[tex.source];
-			int textureID = scene->AddTexture(tex.name, image.image.data(), image.width, image.height, image.component);
+			int textureID = scene->AddTexture(tex.name + std::to_string(i), image.image.data(), image.width, image.height, image.component);
 			textures.push_back(textureID);
 		}
 
@@ -201,15 +201,15 @@ namespace GLSLPT
 
 			if (gltfMat.additionalValues.find("emissiveTexture") != gltfMat.additionalValues.end()) 
 			{
-				material.emissionTexID = gltfMat.additionalValues["emissiveTexture"].TextureIndex();
+				// material.emissionTexID = gltfMat.additionalValues["emissiveTexture"].TextureIndex();
 				// gltfMat.additionalValues["emissiveTexture"].TextureTexCoord();
 			}
 
 			if (gltfMat.additionalValues.find("emissiveFactor") != gltfMat.additionalValues.end()) 
 			{
-				material.emission.x = gltfMat.additionalValues["emissiveFactor"].ColorFactor().data()[0];
-				material.emission.y = gltfMat.additionalValues["emissiveFactor"].ColorFactor().data()[1];
-				material.emission.z = gltfMat.additionalValues["emissiveFactor"].ColorFactor().data()[2];
+				// material.emission.x = gltfMat.additionalValues["emissiveFactor"].ColorFactor().data()[0];
+				// material.emission.y = gltfMat.additionalValues["emissiveFactor"].ColorFactor().data()[1];
+				// material.emission.z = gltfMat.additionalValues["emissiveFactor"].ColorFactor().data()[2];
 			}
 
 			int materialID = scene->AddMaterial(material);

@@ -112,7 +112,7 @@ namespace GLSLPT
         
 		if (scene->textures.size() > 0)
 		{
-            textureMapsArrayTex = new GfxTexture(GL_TEXTURE_2D_ARRAY, GL_RGB8, scene->texWidth, scene->texHeight, scene->textures.size(), GL_RGB, GL_UNSIGNED_BYTE, &scene->textureMapsArray[0]);
+            textureMapsArrayTex = new GfxTexture(GL_TEXTURE_2D_ARRAY, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE, scene->texWidth, scene->texHeight, scene->textures.size(), scene->textureMapsArray.data());
             textureMapsArrayTex->Filter(GL_LINEAR, GL_LINEAR);
 		}
         
