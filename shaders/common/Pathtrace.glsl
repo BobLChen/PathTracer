@@ -56,6 +56,11 @@ void GetMaterialsAndTextures(inout State state, in Ray r)
 		state.ffnormal = dot(state.normal, r.direction) <= 0.0 ? state.normal : state.normal * -1.0;
 	}
 
+	if (int(mat.texIDs.w) >= 0)
+	{
+		mat.emission.xyz *= pow(texture(textureMapsArrayTex, vec3(texUV, int(mat.texIDs.w))).xyz, vec3(2.2));
+	}
+	
 	state.mat = mat;
 }
 

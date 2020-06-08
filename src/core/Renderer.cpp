@@ -147,5 +147,12 @@ namespace GLSLPT
             
             aabbMaxTex->SubImage2D(0, 0, yPos, scene->bvhTranslator.nodeTexWidth, scene->bvhTranslator.nodeTexWidth - yPos, &scene->bvhTranslator.bboxmax[index]);
 		}
+
+		if (scene->hdrModified && hdrTex)
+		{
+			hdrTex->SubImage2D(0, 0, 0, scene->hdrData->width, scene->hdrData->height, scene->hdrData->cols);
+			hdrMarginalDistTex->SubImage2D(0, 0, 0, scene->hdrData->height, 1, scene->hdrData->marginalDistData);
+			hdrConditionalDistTex->SubImage2D(0, 0, 0, scene->hdrData->width, scene->hdrData->height, scene->hdrData->conditionalDistData);
+		}
 	}
 }

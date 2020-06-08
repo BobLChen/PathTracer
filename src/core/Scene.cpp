@@ -122,6 +122,8 @@ namespace GLSLPT
 
 	void Scene::AddHDR(const std::string& filename)
 	{
+		hdrFile = filename;
+
 		if (hdrData)
 		{
 			delete hdrData;
@@ -138,8 +140,10 @@ namespace GLSLPT
 			printf("HDR %s loaded\n", filename.c_str());
 			renderOptions.useEnvMap = true;
 		}
-	}
 
+		hdrModified = true;
+	}
+	
 	int Scene::AddMeshInstance(const MeshInstance &meshInstance)
 	{
 		int id = meshInstances.size();

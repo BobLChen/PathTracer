@@ -81,10 +81,6 @@ namespace GLSLPT
 		Normalize(tmp, Y);
 		//Y.normalize(tmp);
 
-		X[0] = -X[0];
-		X[1] = -X[1];
-		X[2] = -X[2];
-
 		m16[0] = X[0];
 		m16[1] = Y[0];
 		m16[2] = Z[0];
@@ -154,13 +150,13 @@ namespace GLSLPT
 
 		if (m_MMouseDown)
 		{
-			m_World.TranslateX(-mouseSpeedX * m_World.GetOrigin().Size() / 300);
-			m_World.TranslateY( mouseSpeedY * m_World.GetOrigin().Size() / 300);
+			m_World.TranslateX(+mouseSpeedX * m_World.GetOrigin().Size() / 300);
+			m_World.TranslateY(+mouseSpeedY * m_World.GetOrigin().Size() / 300);
 		}
 		else if (m_RMouseDown)
 		{
-			m_SpinX += mouseSpeedX * smooth * speedFactor;
-			m_SpinY += mouseSpeedY * smooth * speedFactor;
+			m_SpinX += -mouseSpeedX * smooth * speedFactor;
+			m_SpinY += +mouseSpeedY * smooth * speedFactor;
 		}
 
 		if (m_MouseWheel != 0.0f) 

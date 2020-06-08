@@ -201,15 +201,15 @@ namespace GLSLPT
 
 			if (gltfMat.additionalValues.find("emissiveTexture") != gltfMat.additionalValues.end()) 
 			{
-				// material.emissionTexID = gltfMat.additionalValues["emissiveTexture"].TextureIndex();
-				// gltfMat.additionalValues["emissiveTexture"].TextureTexCoord();
+				material.emissionTexID = gltfMat.additionalValues["emissiveTexture"].TextureIndex();
+				gltfMat.additionalValues["emissiveTexture"].TextureTexCoord();
 			}
 
 			if (gltfMat.additionalValues.find("emissiveFactor") != gltfMat.additionalValues.end()) 
 			{
-				// material.emission.x = gltfMat.additionalValues["emissiveFactor"].ColorFactor().data()[0];
-				// material.emission.y = gltfMat.additionalValues["emissiveFactor"].ColorFactor().data()[1];
-				// material.emission.z = gltfMat.additionalValues["emissiveFactor"].ColorFactor().data()[2];
+				material.emission.x = gltfMat.additionalValues["emissiveFactor"].ColorFactor().data()[0];
+				material.emission.y = gltfMat.additionalValues["emissiveFactor"].ColorFactor().data()[1];
+				material.emission.z = gltfMat.additionalValues["emissiveFactor"].ColorFactor().data()[2];
 			}
 
 			int materialID = scene->AddMaterial(material);
@@ -288,12 +288,12 @@ namespace GLSLPT
 					{
 						const float* buf = (const float*)(bufferUV0);
 						pos.w = buf[v * 2 + 0];
-						nrm.y = buf[v * 2 + 1];
+						nrm.w = 1.0f - buf[v * 2 + 1];
 					}
 					else
 					{
 						pos.w = 0;
-						nrm.y = 0;
+						nrm.w = 0;
 					}
 					// normal
 					if (bufferNormals)
@@ -414,7 +414,7 @@ namespace GLSLPT
 		// fit scene
 		Vector3 center = sceneBounds.Center();
 		Vector3 extent = sceneBounds.Extents();
-		Vector3 eye    = Vector3(center.x, center.y, center.z + extent.Size() * 1.0f);
+		Vector3 eye    = Vector3(center.x, center.y, center.z - extent.Size() * 1.0f);
 		Vector3 at     = center;
 		scene->AddCamera(eye, at, 60.0f);
 

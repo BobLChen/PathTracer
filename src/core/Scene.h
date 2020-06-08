@@ -79,6 +79,8 @@ namespace GLSLPT
 		std::vector<Light>			lights;
 		// HDR
 		HDRData*					hdrData;
+		std::string					hdrFile;
+		bool						hdrModified = false;
 		// Camera
 		Camera*						camera;
 		// Scene Mesh Data 

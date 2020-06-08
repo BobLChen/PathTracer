@@ -255,7 +255,7 @@ namespace GLSLPT
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, accumTexture);
 
-		if (!scene->camera->isMoving && !scene->instancesModified)
+		if (!scene->camera->isMoving && !scene->instancesModified && !scene->hdrModified)
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, pathTraceFBO);
 			glViewport(0, 0, tileWidth, tileHeight);
@@ -285,7 +285,6 @@ namespace GLSLPT
 			glBindFramebuffer(GL_FRAMEBUFFER, pathTraceFBOLowRes);
 			glViewport(0, 0, frameSize.x / 4, frameSize.y / 4);
 			quad->Draw(pathTraceShaderLowRes);
-			scene->instancesModified = false;
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, frameSize.x, frameSize.y);
@@ -294,7 +293,9 @@ namespace GLSLPT
 			quad->Draw(outputShader);
 		}
 
-		scene->camera->isMoving = false;
+		scene->hdrModified       = false;
+		scene->instancesModified = false;
+		scene->camera->isMoving  = false;
     }
 
     float TiledRenderer::GetProgress() const
@@ -317,7 +318,7 @@ namespace GLSLPT
 		
         Vector2 frameSize = scene->renderOptions.frameSize;
         
-		if (scene->camera->isMoving || scene->instancesModified)
+		if (scene->camera->isMoving || scene->instancesModified || scene->hdrModified)
 		{
 			r1 = r2 = r3 = 0;
 			tileX = -1;
@@ -369,9 +370,9 @@ namespace GLSLPT
                 scene->camera->GetPosition().z
             );
 			glUniform3f(glGetUniformLocation(shaderObject, "camera.right"),
-                scene->camera->GetRight().x,
-                scene->camera->GetRight().y,
-                scene->camera->GetRight().z
+                scene->camera->GetLeft().x,
+                scene->camera->GetLeft().y,
+                scene->camera->GetLeft().z
             );
 			glUniform3f(glGetUniformLocation(shaderObject, "camera.up"),
                 scene->camera->GetUp().x,
@@ -404,9 +405,9 @@ namespace GLSLPT
 				scene->camera->GetPosition().z
 			);
 			glUniform3f(glGetUniformLocation(shaderObject, "camera.right"),
-				scene->camera->GetRight().x,
-				scene->camera->GetRight().y,
-				scene->camera->GetRight().z
+				scene->camera->GetLeft().x,
+				scene->camera->GetLeft().y,
+				scene->camera->GetLeft().z
 			);
 			glUniform3f(glGetUniformLocation(shaderObject, "camera.up"),
 				scene->camera->GetUp().x,

@@ -25,10 +25,12 @@
 using namespace GLSLPT;
 
 int				sampleSceneIndex = -1;
+int				envMapIndex = 0;
 int				selectedInstance = 0;
 double			lastTime = 0;
 std::string		shaderDir;
 std::string		assetsDir;
+std::string     hdrResDir;
 
 Scene*			scene = nullptr;
 Renderer*		renderer = nullptr;
@@ -37,6 +39,8 @@ RenderOptions	renderOptions;
 
 std::vector<std::string> sceneFiles;
 std::vector<std::string> sceneNames;
+std::vector<std::string> envFiles;
+std::vector<std::string> envNames;
 
 void LoadScene(const std::string& file)
 {
@@ -51,13 +55,27 @@ void LoadScene(const std::string& file)
 
 	if (ext == "glb")
 	{
-		scene->AddHDR(assetsDir + "HDR/photo_studio_01_1k.hdr");
-
 		LoadSceneFromGLTF(file.c_str(), scene, renderOptions);
 	}
 	else if (ext == "scene")
 	{
 		LoadSceneFromFile(file.c_str(), scene, renderOptions);
+	}
+
+	if (scene->hdrData == nullptr)
+	{
+		scene->AddHDR(assetsDir + "HDR/vignaioli_night_1k.hdr");
+		scene->renderOptions.useEnvMap = false;
+	}
+
+	envMapIndex = 0;
+	for (int i = 0; i < envFiles.size(); ++i)
+	{
+		if (envFiles[i] == scene->hdrFile) 
+		{
+			envMapIndex = i;
+			break;
+		}
 	}
 
 	scene->renderOptions = renderOptions;
@@ -200,12 +218,21 @@ void OnGUI(float deltaTime)
 	for (int i = 0; i < sceneNames.size(); ++i) {
 		sceneItems.push_back(sceneNames[i].c_str());
 	}
-
 	if (ImGui::Combo("Scene", &sampleSceneIndex, sceneItems.data(), sceneItems.size()))
 	{
 		LoadScene(sceneFiles[sampleSceneIndex]);
 		glfwSetWindowSize(glfwWindow, scene->renderOptions.windowSize.x, scene->renderOptions.windowSize.y);
 		InitRenderer();
+	}
+
+	std::vector<const char*> envItems;
+	for (int i = 0; i < envNames.size(); ++i) {
+		envItems.push_back(envNames[i].c_str());
+	}
+
+	if (ImGui::Combo("EnvMap", &envMapIndex, envItems.data(), envItems.size()))
+	{
+		scene->AddHDR(envFiles[envMapIndex]);
 	}
 
 	bool optionsChanged = false;
@@ -447,7 +474,6 @@ bool InitSceneFiles()
 {
 	std::vector<std::string> files;
 	GetDirFiles(assetsDir, files);
-
 	for (int i = 0; i < files.size(); ++i)
 	{
 		std::string& file = files[i];
@@ -455,6 +481,17 @@ bool InitSceneFiles()
 
 		sceneFiles.push_back(file);
 		sceneNames.push_back(name);
+	}
+
+	files.clear();
+	GetDirFiles(hdrResDir, files);
+	for (int i = 0; i < files.size(); ++i)
+	{
+		std::string& file = files[i];
+		std::string name  = file.substr(file.find_last_of("/\\") + 1);
+
+		envFiles.push_back(file);
+		envNames.push_back(name);
 	}
 
 	return true;
@@ -472,6 +509,7 @@ int main(int argc, char** argv)
 
 	assetsDir = dirPath + "assets/";
 	shaderDir = dirPath + "shaders/";
+	hdrResDir = assetsDir + "HDR/";
 
 	if (!InitSceneFiles()) {
 		return 1;
