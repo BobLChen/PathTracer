@@ -163,6 +163,8 @@ namespace GLSLPT
 		{
 			tinygltf::Material& gltfMat = gltfModel.materials[i];
 			Material material;
+			material.roughness = 0.99f;
+			material.metallic  = 0.99f;
 
 			if (gltfMat.values.find("baseColorFactor") != gltfMat.values.end()) 
 			{

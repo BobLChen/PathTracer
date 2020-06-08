@@ -22,8 +22,8 @@ namespace GLSLPT
 			emission = Vector3(0.0f, 0.0f, 0.0f);
 			unused   = 0;
 
-			metallic  = 1.0f;
-			roughness = 1.0f;
+			metallic  = 0.0f;
+			roughness = 0.5f;
 			ior       = 1.45f;
 			transmittance = 0.0f;
 
