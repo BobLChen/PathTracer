@@ -55,7 +55,7 @@ void LoadScene(const std::string& file)
 
 	if (ext == "glb")
 	{
-		LoadSceneFromGLTF(file.c_str(), scene, renderOptions);
+		LoadSceneFromGLTF(file.c_str(), scene);
 	}
 	else if (ext == "scene")
 	{
@@ -290,11 +290,17 @@ void OnGUI(float deltaTime)
 
 		Vector3* albedo   = &scene->materials[scene->meshInstances[selectedInstance].materialID].albedo;
 		Vector3* emission = &scene->materials[scene->meshInstances[selectedInstance].materialID].emission;
+		int materialType  = +scene->materials[scene->meshInstances[selectedInstance].materialID].type;
 
 		objectPropChanged |= ImGui::ColorEdit3("Albedo", (float*)albedo, 0);
+		objectPropChanged |= ImGui::SliderInt("Type", &materialType, 0, 1);
+		scene->materials[scene->meshInstances[selectedInstance].materialID].type = materialType;
+
 		objectPropChanged |= ImGui::ColorEdit3("Emission", (float*)emission, 0);
 		objectPropChanged |= ImGui::SliderFloat("Metallic", &scene->materials[scene->meshInstances[selectedInstance].materialID].metallic, 0.001, 1.0);
 		objectPropChanged |= ImGui::SliderFloat("Roughness", &scene->materials[scene->meshInstances[selectedInstance].materialID].roughness, 0.001, 1.0);
+		objectPropChanged |= ImGui::SliderFloat("ior", &scene->materials[scene->meshInstances[selectedInstance].materialID].ior, 0.001, 5.0);
+		objectPropChanged |= ImGui::SliderFloat("transmittance", &scene->materials[scene->meshInstances[selectedInstance].materialID].transmittance, 0.001, 5.0);
 
 		ImGui::Separator();
 		ImGui::Text("Transforms");

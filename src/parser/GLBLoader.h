@@ -29,5 +29,5 @@ SOFTWARE.
 
 namespace GLSLPT
 {
-	bool LoadSceneFromGLTF(const std::string& filename, Scene* scene, RenderOptions& renderOptions);
+	bool LoadSceneFromGLTF(const std::string& filename, Scene* scene);
 }

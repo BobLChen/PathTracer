@@ -160,7 +160,7 @@ namespace GLSLPT
 		}
 	}
 
-	bool LoadSceneFromGLTF(const std::string& filename, Scene* scene, RenderOptions& renderOptions)
+	bool LoadSceneFromGLTF(const std::string& filename, Scene* scene)
 	{
 		tinygltf::Model gltfModel;
 		tinygltf::TinyGLTF gltfContext;
@@ -428,12 +428,6 @@ namespace GLSLPT
 		{
 			delete nodeList[i];
 		}
-
-		renderOptions.maxDepth  = 4;
-		renderOptions.numTilesY = 4;
-		renderOptions.numTilesX = 4;
-		renderOptions.intensity = 1.0f;
-		renderOptions.useEnvMap = true;
 
 		// fit scene
 		Vector3 center = sceneBounds.Center();
