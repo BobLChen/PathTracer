@@ -41,24 +41,22 @@ Assets:https://drive.google.com/file/d/1SK9fRyzvpHBNBFb0Gc6nDvDkH7AHVj6H/view?us
 
 ## Screenshots
 
-![Stormtrooper](./screenshots/stormtrooper.jpg)
+![1](./screenshots/1.jpg)
 
-![Hyperion](./screenshots/hyperion.jpg)
+![2](./screenshots/2.jpg)
 
-![Panther](./screenshots/panther.jpg)
+![3](./screenshots/3.jpg)
 
-![Crown](./screenshots/crown.jpg)
+![4](./screenshots/4.jpg)
 
-![Ajax](./screenshots/ajax_materials.jpg)
+![5](./screenshots/5.jpg)
 
-![Dining Room](./screenshots/DiningRoom.jpg)
+![6](./screenshots/6.jpg)
 
-![Rank3PoliceUnit](./screenshots/rank3police_color_corrected.jpg)
+![7](./screenshots/7.jpg)
 
-![Staircase](./screenshots/staircase.jpg)
+![8](./screenshots/8.jpg)
 
-![Substance Boy](./screenshots/MeetMat_Maps.jpg)
+![9](./screenshots/9.jpg)
 
-![City](./screenshots/city.jpg)
-
-![Dragon](./screenshots/dragon.jpg)
+![10](./screenshots/10.jpg)
