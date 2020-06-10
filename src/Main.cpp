@@ -53,8 +53,10 @@ void LoadScene(const std::string& file)
 	
 	std::string ext = file.substr(file.find_last_of(".") + 1);
 
+	bool useGLB = false;
 	if (ext == "glb")
 	{
+		useGLB = true;
 		LoadSceneFromGLTF(file.c_str(), scene);
 	}
 	else if (ext == "scene")
@@ -65,7 +67,7 @@ void LoadScene(const std::string& file)
 	if (scene->hdrData == nullptr)
 	{
 		scene->AddHDR(assetsDir + "HDR/vignaioli_night_1k.hdr");
-		scene->renderOptions.useEnvMap = false;
+		renderOptions.useEnvMap = useGLB;
 	}
 
 	envMapIndex = 0;
