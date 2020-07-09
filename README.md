@@ -57,6 +57,4 @@ Assets:https://drive.google.com/file/d/1SK9fRyzvpHBNBFb0Gc6nDvDkH7AHVj6H/view?us
 
 ![8](./screenshots/8.jpg)
 
-![9](./screenshots/9.jpg)
-
 ![10](./screenshots/10.jpg)
